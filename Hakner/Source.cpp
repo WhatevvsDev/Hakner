@@ -3,6 +3,7 @@
 
 #include <DirectXMath.h>
 #include "AppWindow.h"
+#include "Renderer.h"
 #include "Helper.h"
 #include <SDL.h>
 
@@ -25,6 +26,8 @@ int main()
 
 	// Clear color
 	SDL_SetRenderDrawColor(windowData->renderer,255,0,0,255);
+
+	Renderer::Initialize();
 	
 	while (!quit) 
 	{ 
@@ -37,9 +40,9 @@ int main()
 				quit = true; 
 		} 
 
-		/*
-			Draw stuff to CPU backbuffer here
-		*/
+		Renderer::Update();
+
+		Renderer::Render();
 
 		// Copy CPU backbuffer to GPU texture, and present that on-screen
 		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));

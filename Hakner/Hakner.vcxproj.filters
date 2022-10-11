@@ -24,6 +24,9 @@
     <ClCompile Include="HaknerMath.h">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Dependencies\lib\x64\SDL2.dll" />
