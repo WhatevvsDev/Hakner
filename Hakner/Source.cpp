@@ -26,8 +26,6 @@ int main()
 
 	// Clear color
 	SDL_SetRenderDrawColor(windowData->renderer,255,0,0,255);
-
-	Renderer::Initialize();
 	
 	while (!quit) 
 	{ 
