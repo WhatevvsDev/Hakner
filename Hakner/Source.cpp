@@ -13,19 +13,18 @@
 
 int main()
 {
+	// QoL
 	using namespace hakner;
 	auto& windowData = AppWindow::State;
 
-	AppWindow::Initialize();
-
 	LogAssert("Failed to verify DirectXMath CPU support", DirectX::XMVerifyCPUSupport());
+	
+	AppWindow::Initialize();
+	SDL_SetRenderDrawColor(windowData->renderer,255,0,0,255);
 	
 	// Window event related
 	SDL_Event e;
 	bool quit = false; 
-
-	// Clear color
-	SDL_SetRenderDrawColor(windowData->renderer,255,0,0,255);
 	
 	while (!quit) 
 	{ 
@@ -34,8 +33,7 @@ int main()
 		// Handle SDL events
 		while (SDL_PollEvent(&e)) 
 		{ 
-			if (e.type == SDL_QUIT) 
-				quit = true; 
+			quit = (e.type == SDL_QUIT); 
 		} 
 
 		Renderer::Update();

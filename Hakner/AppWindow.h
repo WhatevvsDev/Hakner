@@ -8,16 +8,20 @@ namespace hakner
 	{
 		inline struct WindowState
 		{
-			std::string title = "Hakner Raytracer";
-
+			// Client Area
 			unsigned int width = 1280;
 			unsigned int height = 720;
 			unsigned int pixelCount = width * height;
+			uint32_t* backBuffer { nullptr };
+			
+			// Window
+			std::string title = "Hakner Raytracer";
+			bool initialized { false };
+
+			// SDL Related Variables
 			SDL_Renderer* renderer { nullptr };
 			SDL_Window* window { nullptr };
 			SDL_Texture* texture { nullptr };
-			bool initialized { false };
-			uint32_t* backBuffer { nullptr };
 		} *State;
 
 		void Initialize();

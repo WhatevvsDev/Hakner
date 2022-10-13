@@ -25,8 +25,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
+    <ClInclude Include="Math.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Helper.h" />
+    <ClInclude Include="SimpleMath.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SimpleMath.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

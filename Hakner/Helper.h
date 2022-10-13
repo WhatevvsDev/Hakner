@@ -21,6 +21,7 @@ namespace hakner
 
 		namespace
 		{
+			// Get Windows Console specific attribute for different text color
 			WORD TypeToColor(MessageType aType)
 			{
 				switch (aType)
@@ -44,16 +45,22 @@ namespace hakner
 			if(aAssertion && aType == Error)
 				return;
 
+			// If assertion didn't pass, throw an exception
 			if(!aAssertion)
-				throw std::exception();
-
-			WORD attribute = TypeToColor(aType);
+				throw std::exception(aMessage.c_str());
 
 			HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-			SetConsoleTextAttribute(handle, attribute);
-			std::string filePath(aFile);
 
-			printf("[%s: %i] - %s\n", filePath.substr(filePath.find_last_of("/\\") + 1).c_str(), aLineNumber, aMessage.c_str());
+			// Modify color of text
+			WORD attribute = TypeToColor(aType);
+			SetConsoleTextAttribute(handle, attribute);
+
+			// Get only file name
+			std::string fileName { aFile };
+			fileName = fileName.substr(fileName.find_last_of("/\\") + 1).c_str();
+
+			// Print and reset color
+			printf("[%s: %i] - %s\n", fileName.c_str(), aLineNumber, aMessage.c_str());
 			SetConsoleTextAttribute(handle, 15);
 		}
 	}
