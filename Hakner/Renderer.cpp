@@ -1,9 +1,50 @@
 #include "Renderer.h"
 #include "AppWindow.h"
 #include "Math.h"
+#include <vector>
 
 namespace hakner
 {
+
+	struct HitData
+	{
+		Color color { 1, 0, 1 };
+		Vector3 normal { 0, 0, 0 };
+		int intersections { 0 };
+	};
+
+
+	struct Sphere
+	{
+		Sphere(Vector3 aPosition, Color aColor, float aRadius)
+			: position(aPosition)
+			, color(aColor)
+			, radius(aRadius)
+			, radiusradius(aRadius * aRadius)
+		{
+
+		}
+
+		float GetRadius() { return radius; };
+		float GetRadiusSquared() { return radiusradius; };
+		void SetRadius(float aRadius) { radius = aRadius; radiusradius = aRadius * aRadius; };
+
+		Vector3 position { 0, 0, 0 };
+		Color color { 255, 0, 255, 0 };
+
+	private:
+		float radius { 1 };
+		float radiusradius { 1 };
+	};
+
+	std::vector<Sphere> g_world;
+
+	void Renderer::Initialize()
+	{
+		g_world.push_back({{0,0,-10}, {255,0,255,0}, 1.0f});
+		g_world.push_back({{2,0,-10}, {255,0,255,0}, 1.0f});
+	}
+
 	void Renderer::Update()
 	{
 
@@ -15,16 +56,13 @@ namespace hakner
 		y -= AppWindow::State->height / 2;
 
 		float cameraFOV = 90.0f;
-
 		float tanHalfAngle = tan(cameraFOV * 0.5f);
 		
-		float aspectScale = (float)AppWindow::State->width;
-		
-		float mul = tanHalfAngle / aspectScale;
+		float mul = tanHalfAngle / (float)AppWindow::State->width;
 		Vector3 direction = (Vector3(x * mul, -y * mul, -1));
 		direction.Normalize();
 
-		return { Vector3(0.f), direction };
+		return { Vector3(0.0f , 0.0f, 0.0f), direction };
 	}
 
 	Color Sky(Ray ray)
@@ -38,12 +76,11 @@ namespace hakner
 		return { (unsigned char)vColor.x, (unsigned char)vColor.y, (unsigned char)vColor.z, 0};
 	}
 
-	struct
-	{
-		Vector3 position {0, 0, 10};
-		float radius { 1 };
-	} Sphere;
+	Color VectorToColor(Vector3 v);
+	Color VectorToColor(Vector4 v);
 
+	// Assuming vector is 0.0 -> 1.0
+	Color VectorToColor(Vector3 v) { return VectorToColor({v.x, v.y, v.z, 0.0f}); };
 	Color VectorToColor(Vector4 v)
 	{
 		v.x *= 255;
@@ -60,18 +97,38 @@ namespace hakner
 	}
 
 
-	Color Raytrace(Ray ray)
-	{ 
-		Vector3 oc = ray.origin - Sphere.position;
-		float a = ray.direction.LengthSquared();
-		float b = 2.0f * oc.Dot(ray.direction);
-		auto c = oc.LengthSquared() - Sphere.radius * Sphere.radius;
-		auto discriminant = b*b - 4*a*c;
+	void Intersection(Ray& ray, HitData& data)
+	{
+		auto& currentSphere = g_world[0];
+
+		Vector3 oc = ray.origin - currentSphere.position;
+		auto a = ray.direction.LengthSquared();
+		auto half_b = oc.Dot(ray.direction);
+		auto c = oc.LengthSquared() - currentSphere.GetRadiusSquared();
+		auto discriminant = half_b*half_b - a*c;
 
 		if (discriminant < 0)
-			return Sky(ray);
-		else
-			return {255, 0, 0, 0};
+		{
+			data.color = Sky(ray);
+			return;
+		}
+
+		auto t = (-half_b - sqrt(discriminant) ) / a;
+
+		if(t < 0)
+		{
+			data.color = Sky(ray);
+			return;
+		}
+
+		data.normal = (ray.At(t) - currentSphere.position);
+		data.color = currentSphere.color;
+
+	}
+
+	void Raytrace(Ray ray, HitData& data)
+	{ 
+		Intersection(ray, data);
 	}
 
 	void Renderer::Render()
@@ -85,7 +142,20 @@ namespace hakner
 			{
 				int i = x + (y * window.width);
 
-				surface[i] = Raytrace(GenerateRay(x, y)).value;
+				HitData data;
+
+				Raytrace(GenerateRay(x, y), data);
+
+				Vector3 norm = data.normal * 0.5f;
+				norm += Vector3(0.5f);
+
+				bool showNormals = true;
+
+				if(showNormals)
+					surface[i] = VectorToColor(norm).value;
+				else
+					surface[i] = data.color.value;
+
 			}
 		}
 	}

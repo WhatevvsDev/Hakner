@@ -26,6 +26,8 @@ int main()
 	SDL_Event e;
 	bool quit = false; 
 	
+	Renderer::Initialize();
+
 	while (!quit) 
 	{ 
 		SDL_RenderClear(windowData->renderer);
