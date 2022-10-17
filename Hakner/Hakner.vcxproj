@@ -29,6 +29,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="SimpleMath.h" />
+    <ClInclude Include="Sphere.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl" />

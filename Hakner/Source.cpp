@@ -26,7 +26,7 @@ int main()
 	SDL_Event e;
 	bool quit = false; 
 	
-	Renderer::Initialize();
+	Graphics::Renderer::Initialize();
 
 	while (!quit) 
 	{ 
@@ -38,9 +38,9 @@ int main()
 			quit = (e.type == SDL_QUIT); 
 		} 
 
-		Renderer::Update();
+		Graphics::Renderer::Update();
 
-		Renderer::Render();
+		Graphics::Renderer::Render();
 
 		// Copy CPU backbuffer to GPU texture, and present that on-screen
 		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));
