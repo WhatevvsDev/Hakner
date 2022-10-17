@@ -18,7 +18,7 @@ void hakner::AppWindow::Initialize()
 	State->backBuffer = new uint32_t[State->pixelCount];
 	State->renderer = SDL_CreateRenderer(State->window, -1, SDL_RENDERER_ACCELERATED);
 	
-	// Format is ABGR8888 so that passed colors are not flipped in Renderer
+	// Format is ABGR8888 because of little endianness
 	State->texture = SDL_CreateTexture(State->renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, State->width, State->height);
 	LogMsg(Log::Debug, "SDL Intialized.");
 
