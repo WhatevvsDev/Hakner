@@ -11,21 +11,23 @@ namespace hakner
 	struct Ray
 	{
 
-#ifdef _DEBUG
 		Ray(Vector3 aOrigin, Vector3 aDirection)
 			: origin(aOrigin)
 			, direction(aDirection)
 		{
+#ifdef _DEBUG
 			if(aDirection.LengthSquared() != 1)
 			{
 				LogMsg(Log::Error, "Ray direction is not normalized! Probably should be. (Automatically normalized)");
 				aDirection.Normalize();
 			}
-		}
 #endif
+		}
 
 		Vector3 origin;
+		float min { 0.0001f };
 		Vector3 direction;
+		float max { INFINITY };
 
 		inline Vector3 At(float t) { return origin + direction * t; };
 	};

@@ -15,6 +15,7 @@
     <ClCompile Include="HaknerMath.h" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Dependencies\lib\x64\SDL2.dll">
@@ -29,6 +30,8 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="SimpleMath.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl" />
@@ -39,6 +42,7 @@
     <ProjectGuid>{334ae483-f33e-4b35-a6df-b48f3b384936}</ProjectGuid>
     <RootNamespace>Hakner</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>HaknerRaytracing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -67,12 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Hakner\Dependencies\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Hakner\Hakner\Dependencies\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\lib;$(SolutionDir)Hakner\Dependencies\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Hakner\Dependencies\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Hakner\Hakner\Dependencies\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\lib;$(SolutionDir)Hakner\Dependencies\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -81,6 +83,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Hakner\Dependencies\include;$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -97,6 +100,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Hakner\Dependencies\include;$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
