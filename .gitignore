@@ -34,7 +34,7 @@ bld/
 [Ll]ogs/
 
 #But not dependencies!
-!Dependencies
+!Hakner/Dependencies
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
