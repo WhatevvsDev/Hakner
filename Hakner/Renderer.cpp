@@ -16,6 +16,8 @@ namespace hakner
 		{
 			g_world.push_back({ { 0, 0, 0 }, {255,0,255,0}, 1.0f });
 			g_world.push_back({ { 1, 0, 0.5 }, {255,255,0,0}, 0.8f });
+
+			renderTimer.Start();
 		}
 
 		void Renderer::MouseMove(int aDeltaX, int aDeltaY)
@@ -56,7 +58,9 @@ namespace hakner
 
 		void Renderer::Update()
 		{
-			Camera.position += {(float)moveHor, (float)moveVer, (float)moveWard};
+			float deltaTime = renderTimer.Delta() * 0.001f;
+
+			Camera.position += Vector3{(float)moveHor, (float)moveVer, (float)moveWard} * deltaTime;
 		}
 
 		Ray GenerateRay(int x, int y)
@@ -214,7 +218,7 @@ namespace hakner
 
 		void Renderer::CameraData::CalculateRotationMatrix()
 		{
-			rotationMatrix = Matrix::CreateRotationY(Camera.yaw) * Matrix::CreateRotationX(Camera.pitch);
+			rotationMatrix = Matrix::CreateRotationX(Camera.pitch) * Matrix::CreateRotationY(Camera.yaw);
 		}
 
 	}

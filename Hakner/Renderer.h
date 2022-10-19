@@ -2,6 +2,7 @@
 
 #include "Math.h"
 #include "SDL.h"
+#include "Timer.h"
 
 namespace hakner
 {
@@ -35,8 +36,10 @@ namespace hakner
 			inline bool up = false;
 			inline bool down = false;
 			inline int moveVer = 0;
-
+			
 			inline float mouseSens = 0.01f;
+
+			inline Timer renderTimer;
 
 			inline struct CameraData
 			{
