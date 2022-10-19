@@ -10,20 +10,59 @@ namespace hakner
 	{
 		std::vector<Sphere> g_world;
 		bool showNormals = false;
+		float t = 0;
 
 		void Renderer::Initialize()
 		{
-			g_world.push_back({ {0,0,-10}, {255,0,255,0}, 1.0f });
-			g_world.push_back({ {1,0,-9.5}, {255,255,0,0}, 0.8f });
+			g_world.push_back({ { 0, 0, 0 }, {255,0,255,0}, 1.0f });
+			g_world.push_back({ { 1, 0, 0.5 }, {255,255,0,0}, 0.8f });
+		}
+
+		void Renderer::MouseMove(int aDeltaX, int aDeltaY)
+		{
+			Camera.AddYaw(-aDeltaX * mouseSens);
+			Camera.AddPitch(-aDeltaY * mouseSens);
+		}
+
+		void Renderer::KeyPress(SDL_Scancode aKey, bool aPressed)
+		{
+			switch (aKey)
+			{
+			case SDL_SCANCODE_W:
+				forward = aPressed;
+				break;
+			case SDL_SCANCODE_A:
+				left = aPressed;
+				break;
+			case SDL_SCANCODE_S:
+				backward = aPressed;
+				break;
+			case SDL_SCANCODE_D:
+				right = aPressed;
+				break;
+			case SDL_SCANCODE_LSHIFT:
+			case SDL_SCANCODE_RSHIFT:
+				down = aPressed;
+				break;
+			case SDL_SCANCODE_SPACE:
+				up = aPressed;
+				break;
+			}
+
+			moveHor = right - left;
+			moveWard = backward - forward;
+			moveVer = up - down;
 		}
 
 		void Renderer::Update()
 		{
-
+			Camera.position += {(float)moveHor, (float)moveVer, (float)moveWard};
 		}
 
 		Ray GenerateRay(int x, int y)
 		{
+			// ---------- Generate new Ray ----------
+			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
 			x -= AppWindow::State->width / 2;
 			y -= AppWindow::State->height / 2;
 
@@ -34,15 +73,18 @@ namespace hakner
 			Vector3 direction = (Vector3(x * mul, -y * mul, -1));
 			direction.Normalize();
 
-			return { Vector3(0.0f , 0.0f, 0.0f), direction };
+			// ---------- Transform ray to align with camera direction ----------
+			direction = Vector3::Transform(direction, Renderer::Camera.GetRotationMatrix());
+
+			return { Renderer::Camera.position, direction };
 		}
 
 		Color Sky(Ray ray)
 		{
 			float t = 0.5f * (ray.direction.y + 1.0f);
 
-			// Lerp between white and blueish for sky color
-			Vector3 vColor = (1.0f - t) * Vector3(1.0f, 1.0f, 1.0f) + t * Vector3(0.5f, 0.7f, 1.0f);
+			// Lerp between colors for sky color
+			Vector3 vColor = (1.0f - t) * Vector3(1.0f, 0.8f, 0.65f) + t * Vector3(0.4f, 0.6f, 1.0f);
 			vColor *= 255;
 
 			return { (unsigned char)vColor.x, (unsigned char)vColor.y, (unsigned char)vColor.z, 0 };
@@ -68,57 +110,50 @@ namespace hakner
 			return { r,g,b,a };
 		}
 
+		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
 
-		void Intersection(Ray& ray, HitData& data)
+		void IntersectWorld(Ray& ray, HitData& data)
 		{
 			for (auto& currentSphere : g_world)
 			{
+				Intersect(ray, data, currentSphere);
+			}
+		}
 
-				Vector3 oc = ray.origin - currentSphere.position;
-				float half_b = oc.Dot(ray.direction);
-				float c = oc.LengthSquared() - currentSphere.GetRadiusSquared();
-				float discriminant = half_b * half_b - c;
+		void Intersect(Ray& ray, HitData& data, Sphere& sphere)
+		{
+			Vector3 oc = ray.origin - sphere.position;
+			float half_b = oc.Dot(ray.direction);
+			float c = oc.LengthSquared() - sphere.GetRadiusSquared();
+			float discriminant = half_b * half_b - c;
 
-				if (discriminant < 0) 
-					continue;
+			if (discriminant < 0)
+				return;
 
-				float sqrtd = sqrtf(discriminant);
+			float sqrtd = sqrtf(discriminant);
 
-				// Find the nearest root that lies in the acceptable range.
-				float root = (-half_b - sqrtd);
-				if (root < ray.min || ray.max < root) 
-				{
-					root = (-half_b + sqrtd);
-					if (root < ray.min || ray.max < root)
-						continue;
-				}
-
-				if(root > data.distance)
-					continue;
-
-				data.distance = root;
-				data.hitPosition = ray.At(data.distance);
-				data.normal = (data.hitPosition - currentSphere.position);
-				data.intersections++;
-				
-				// Color
-				if (showNormals)
-				{
-					Vector3 norm = data.normal * 0.5f;
-					norm += Vector3(0.5f);
-					data.color = VectorToColor(norm);
-				}
-				else
-				{
-					data.color = currentSphere.color;
-				}
+			// Find the nearest root that lies in the acceptable range.
+			float root = (-half_b - sqrtd);
+			if (root < ray.min || ray.max < root)
+			{
+				root = (-half_b + sqrtd);
+				if (root < ray.min || ray.max < root)
+					return;
 			}
 
+			if (root > data.distance)
+				return;
+
+			data.distance = root;
+			data.hitPosition = ray.At(data.distance);
+			data.normal = (data.hitPosition - sphere.position);
+			data.intersections++;
+			data.color = sphere.color;
 		}
 
 		void Raytrace(Ray ray, HitData& data)
 		{
-			Intersection(ray, data);
+			IntersectWorld(ray, data);
 		}
 
 		void Renderer::Render()
@@ -137,12 +172,50 @@ namespace hakner
 
 					Raytrace(ray, data);
 
-					if (data.intersections == 0)
+					if (!data.intersections)
 						surface[i] = Sky(ray).value;
-					else
+					else if (showNormals)
 						surface[i] = data.color.value;
+					else
+						surface[i] = VectorToColor(data.normal * 0.5f + Vector3{ 0.5f }).value;
 				}
 			}
 		}
+
+		void Renderer::CameraData::AddPitch(float aPitch)
+		{
+			dirtyRotationMatrix = true;
+			pitch += aPitch;
+
+			if(pitch > 85) pitch = 85;
+			if(pitch < -85) pitch = -85;
+		}
+
+		void Renderer::CameraData::AddYaw(float aYaw)
+		{
+			dirtyRotationMatrix = true;
+			yaw += aYaw;
+		}
+
+		void Renderer::CameraData::SetRotation(float aPitch, float aYaw)
+		{
+			dirtyRotationMatrix = true;
+			pitch = aPitch;
+			yaw = aYaw;
+		}
+
+		Matrix Renderer::CameraData::GetRotationMatrix()
+		{
+			if(dirtyRotationMatrix)
+				CalculateRotationMatrix();
+
+			return rotationMatrix;
+		}
+
+		void Renderer::CameraData::CalculateRotationMatrix()
+		{
+			rotationMatrix = Matrix::CreateRotationY(Camera.yaw) * Matrix::CreateRotationX(Camera.pitch);
+		}
+
 	}
 }

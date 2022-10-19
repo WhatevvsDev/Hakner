@@ -36,6 +36,22 @@ int main()
 		while (SDL_PollEvent(&e)) 
 		{ 
 			quit = (e.type == SDL_QUIT); 
+
+			switch(e.type)
+			{
+				case SDL_QUIT:
+					quit = true;
+				break;
+				case SDL_KEYDOWN:
+					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
+					break;
+				case SDL_KEYUP:
+					Graphics::Renderer::KeyPress(e.key.keysym.scancode, false);
+					break;
+				case SDL_MOUSEMOTION:
+					Graphics::Renderer::MouseMove(e.motion.xrel, e.motion.yrel);
+					break;
+			}
 		} 
 
 		Graphics::Renderer::Update();

@@ -9,8 +9,8 @@ namespace hakner
 		inline struct WindowState
 		{
 			// Client Area
-			unsigned int width = 1280;
-			unsigned int height = 720;
+			unsigned int width = 800;
+			unsigned int height = 800;
 			unsigned int pixelCount = width * height;
 			uint32_t* backBuffer { nullptr };
 			
