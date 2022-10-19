@@ -2,7 +2,7 @@
 
 Hakner is a raytracing hobby project for me to learn the ins and outs of modern raytracing on both CPU and later GPU.
 
-<img src="./hakner/Render.jpg">
+<img src="https://raw.githubusercontent.com/WhatevvsDev/Hakner/master/Hakner/Render.jpg" height=400px>
 
 ### Dependencies
 * SDL2
