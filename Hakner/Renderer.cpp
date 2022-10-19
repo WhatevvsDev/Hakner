@@ -4,6 +4,9 @@
 #include "Sphere.h"
 #include <vector>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 namespace hakner
 {
 	namespace Graphics
@@ -50,6 +53,9 @@ namespace hakner
 			case SDL_SCANCODE_RSHIFT:
 				down = aPressed;
 				break;
+			case SDL_SCANCODE_P:
+				if(!aPressed) // Released
+					renderToFile = true;
 			case SDL_SCANCODE_SPACE:
 				up = aPressed;
 				break;
@@ -74,6 +80,11 @@ namespace hakner
 		}
 
 		// ---------- RENDERING ----------
+
+		void SaveRenderToFile()
+		{
+			stbi_write_jpg("Render.jpg", AppWindow::State->width, AppWindow::State->height, 4, AppWindow::State->backBuffer, 95);
+		}
 
 		Ray GenerateRay(int x, int y)
 		{
@@ -196,6 +207,12 @@ namespace hakner
 					else
 						surface[i] = VectorToColor(data.normal * 0.5f + Vector3{ 0.5f }).value;
 				}
+			}
+
+			if(renderToFile)
+			{
+				SaveRenderToFile();
+				renderToFile = false;
 			}
 		}
 
