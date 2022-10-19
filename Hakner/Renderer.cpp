@@ -56,6 +56,7 @@ namespace hakner
 			case SDL_SCANCODE_P:
 				if(!aPressed) // Released
 					renderToFile = true;
+				break;
 			case SDL_SCANCODE_SPACE:
 				up = aPressed;
 				break;
