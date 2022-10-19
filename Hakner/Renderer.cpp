@@ -26,8 +26,8 @@ namespace hakner
 
 		void Renderer::MouseMove(int aDeltaX, int aDeltaY)
 		{
-			Camera.AddYaw(-aDeltaX);
-			Camera.AddPitch(-aDeltaY);
+			Camera.AddYaw((float)-aDeltaX);
+			Camera.AddPitch((float)-aDeltaY);
 		}
 
 		void Renderer::KeyPress(SDL_Scancode aKey, bool aPressed)
