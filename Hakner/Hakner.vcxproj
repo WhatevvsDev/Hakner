@@ -121,10 +121,14 @@
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Dependencies\SDL2-2.0.20\lib\SDL2.dll" />
     <None Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2.dll" />
     <None Include="SimpleMath.inl" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Dependencies\SDL2-2.0.20\lib\SDL2.lib" />
+    <Library Include="Dependencies\SDL2-2.0.20\lib\SDL2main.lib" />
+    <Library Include="Dependencies\SDL2-2.0.20\lib\SDL2test.lib" />
     <Library Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2.lib" />
     <Library Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2main.lib" />
     <Library Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2test.lib" />
