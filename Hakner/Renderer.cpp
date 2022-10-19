@@ -191,6 +191,8 @@ namespace hakner
 			dirtyRotationMatrix = true;
 			pitch += aPitch;
 
+			printf("Pitch is :%f \n", pitch);
+
 			if(pitch > 85) pitch = 85;
 			if(pitch < -85) pitch = -85;
 		}
@@ -218,7 +220,7 @@ namespace hakner
 
 		void Renderer::CameraData::CalculateRotationMatrix()
 		{
-			rotationMatrix = Matrix::CreateRotationX(Camera.pitch) * Matrix::CreateRotationY(Camera.yaw);
+			rotationMatrix = Matrix::CreateRotationX(DirectX::XMConvertToRadians(Camera.pitch)) * Matrix::CreateRotationY(DirectX::XMConvertToRadians(Camera.yaw));
 		}
 
 	}
