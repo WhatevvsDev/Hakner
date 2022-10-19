@@ -14,7 +14,7 @@ namespace hakner
 		void Renderer::Initialize()
 		{
 			g_world.push_back({ {0,0,-10}, {255,0,255,0}, 1.0f });
-			g_world.push_back({ {2,0,-10}, {255,0,255,0}, 0.3f });
+			g_world.push_back({ {1,0,-9.5}, {255,255,0,0}, 0.8f });
 		}
 
 		void Renderer::Update()
@@ -73,23 +73,34 @@ namespace hakner
 		{
 			for (auto& currentSphere : g_world)
 			{
+
 				Vector3 oc = ray.origin - currentSphere.position;
-				auto a = ray.direction.LengthSquared();
-				auto half_b = oc.Dot(ray.direction);
-				auto c = oc.LengthSquared() - currentSphere.GetRadiusSquared();
-				auto discriminant = half_b * half_b - a * c;
+				float half_b = oc.Dot(ray.direction);
+				float c = oc.LengthSquared() - currentSphere.GetRadiusSquared();
+				float discriminant = half_b * half_b - c;
 
-				if (discriminant < 0)
+				if (discriminant < 0) 
 					continue;
 
-				auto t = (-half_b - sqrt(discriminant)) / a;
+				float sqrtd = sqrtf(discriminant);
 
-				if (t < 0 || t > data.distance)
+				// Find the nearest root that lies in the acceptable range.
+				float root = (-half_b - sqrtd);
+				if (root < ray.min || ray.max < root) 
+				{
+					root = (-half_b + sqrtd);
+					if (root < ray.min || ray.max < root)
+						continue;
+				}
+
+				if(root > data.distance)
 					continue;
 
+				data.distance = root;
+				data.hitPosition = ray.At(data.distance);
+				data.normal = (data.hitPosition - currentSphere.position);
 				data.intersections++;
-				data.normal = (ray.At(t) - currentSphere.position);
-
+				
 				// Color
 				if (showNormals)
 				{

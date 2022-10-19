@@ -40,6 +40,7 @@
     <ProjectGuid>{334ae483-f33e-4b35-a6df-b48f3b384936}</ProjectGuid>
     <RootNamespace>Hakner</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>HaknerRaytracing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

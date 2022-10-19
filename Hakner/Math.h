@@ -25,9 +25,9 @@ namespace hakner
 		}
 
 		Vector3 origin;
-		float min;
+		float min { 0.0001f };
 		Vector3 direction;
-		float max;
+		float max { INFINITY };
 
 		inline Vector3 At(float t) { return origin + direction * t; };
 	};
