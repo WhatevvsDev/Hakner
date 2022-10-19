@@ -191,8 +191,6 @@ namespace hakner
 			dirtyRotationMatrix = true;
 			pitch += aPitch;
 
-			printf("Pitch is :%f \n", pitch);
-
 			if(pitch > 85) pitch = 85;
 			if(pitch < -85) pitch = -85;
 		}
