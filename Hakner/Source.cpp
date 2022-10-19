@@ -19,15 +19,16 @@ int main()
 
 	LogAssert("Failed to verify DirectXMath CPU support", DirectX::XMVerifyCPUSupport());
 	
+	// ---------- Initialize Window and Renderer ----------
 	AppWindow::Initialize();
+	Graphics::Renderer::Initialize();
+
 	SDL_SetRenderDrawColor(windowData->renderer,255,0,0,255);
 	
-	// Window event related
+	// ---------- Main Loop ----------
 	SDL_Event e;
 	bool quit = false; 
 	
-	Graphics::Renderer::Initialize();
-
 	while (!quit) 
 	{ 
 		SDL_RenderClear(windowData->renderer);
@@ -58,7 +59,7 @@ int main()
 
 		Graphics::Renderer::Render();
 
-		// Copy CPU backbuffer to GPU texture, and present that on-screen
+		// ---------- Copy CPU backbuffer to GPU texture, and present that on-screen ----------
 		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));
 		SDL_RenderCopy(windowData->renderer, windowData->texture, NULL, NULL);
 		SDL_RenderPresent(windowData->renderer);

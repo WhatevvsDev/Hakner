@@ -8,9 +8,11 @@ namespace hakner
 {
 	namespace Graphics
 	{
+		// TODO: Replace this
 		std::vector<Sphere> g_world;
 		bool showNormals = false;
-		float t = 0;
+
+		// ---------- INITIALIZE ----------
 
 		void Renderer::Initialize()
 		{
@@ -20,10 +22,12 @@ namespace hakner
 			renderTimer.Start();
 		}
 
+		// ---------- INPUT ----------
+
 		void Renderer::MouseMove(int aDeltaX, int aDeltaY)
 		{
-			Camera.AddYaw(-aDeltaX * mouseSens);
-			Camera.AddPitch(-aDeltaY * mouseSens);
+			Camera.AddYaw(-aDeltaX);
+			Camera.AddPitch(-aDeltaY);
 		}
 
 		void Renderer::KeyPress(SDL_Scancode aKey, bool aPressed)
@@ -56,12 +60,20 @@ namespace hakner
 			moveVer = up - down;
 		}
 
+		// ---------- UPDATE ----------
+
 		void Renderer::Update()
 		{
 			float deltaTime = renderTimer.Delta() * 0.001f;
 
-			Camera.position += Vector3{(float)moveHor, (float)moveVer, (float)moveWard} * deltaTime;
+			// ---------- Get move direction, align with camera, and update position ----------
+			Vector3 moveVector = Vector3{(float)moveHor, (float)moveVer, (float)moveWard};
+			moveVector = Vector3::Transform(moveVector, Camera.GetRotationMatrix());
+
+			Camera.position += moveVector * deltaTime;
 		}
+
+		// ---------- RENDERING ----------
 
 		Ray GenerateRay(int x, int y)
 		{
@@ -176,6 +188,7 @@ namespace hakner
 
 					Raytrace(ray, data);
 
+					// TODO: Replace this
 					if (!data.intersections)
 						surface[i] = Sky(ray).value;
 					else if (showNormals)
@@ -185,6 +198,8 @@ namespace hakner
 				}
 			}
 		}
+
+		// ---------- CAMERA ----------
 
 		void Renderer::CameraData::AddPitch(float aPitch)
 		{
@@ -220,6 +235,5 @@ namespace hakner
 		{
 			rotationMatrix = Matrix::CreateRotationX(DirectX::XMConvertToRadians(Camera.pitch)) * Matrix::CreateRotationY(DirectX::XMConvertToRadians(Camera.yaw));
 		}
-
 	}
 }

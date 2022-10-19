@@ -19,13 +19,16 @@ namespace hakner
 
 		namespace Renderer
 		{
+			// ---------- Main Functions ----------
 			void Initialize();
-
-			void MouseMove(int aDeltaX, int aDeltaY);
-			void KeyPress(SDL_Scancode aKey, bool aPressed);
 			void Update();
 			void Render();
 
+			// ---------- Initialize Window and Renderer ----------
+			void MouseMove(int aDeltaX, int aDeltaY);
+			void KeyPress(SDL_Scancode aKey, bool aPressed);
+
+			// ---------- Inputs ----------
 			// TODO: Replace this
 			inline bool left = false;
 			inline bool right = false;
@@ -36,11 +39,8 @@ namespace hakner
 			inline bool up = false;
 			inline bool down = false;
 			inline int moveVer = 0;
-			
-			inline float mouseSens = 0.01f;
 
-			inline Timer renderTimer;
-
+			// ---------- Camera ----------
 			inline struct CameraData
 			{
 				Vector3 position{ 0, 0, 10};
@@ -59,6 +59,9 @@ namespace hakner
 				bool dirtyRotationMatrix { true };
 				void CalculateRotationMatrix();
 			} Camera;
+
+			// ---------- Misc ----------
+			inline Timer renderTimer;
 		}
 	}
 }
