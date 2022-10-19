@@ -18,13 +18,6 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="Dependencies\lib\x64\SDL2.dll">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="Dependencies\SDL2-2.0.20\include\begin_code.h" />
     <ClInclude Include="Dependencies\SDL2-2.0.20\include\close_code.h" />
@@ -121,17 +114,7 @@
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Dependencies\SDL2-2.0.20\lib\SDL2.dll" />
-    <None Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2.dll" />
     <None Include="SimpleMath.inl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="Dependencies\SDL2-2.0.20\lib\SDL2.lib" />
-    <Library Include="Dependencies\SDL2-2.0.20\lib\SDL2main.lib" />
-    <Library Include="Dependencies\SDL2-2.0.20\lib\SDL2test.lib" />
-    <Library Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2.lib" />
-    <Library Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2main.lib" />
-    <Library Include="Dependencies\SDL2-2.0.20\lib\x64\SDL2test.lib" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -182,7 +165,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -202,7 +185,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Hakner\Dependencies\SDL2-2.0.20\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
