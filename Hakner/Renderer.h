@@ -62,6 +62,7 @@ namespace hakner
 
 			// ---------- Misc ----------
 			inline Timer renderTimer;
+			inline bool renderToFile{ false };
 		}
 	}
 }
