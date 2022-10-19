@@ -2,6 +2,8 @@
 
 Hakner is a raytracing hobby project for me to learn the ins and outs of modern raytracing on both CPU and later GPU.
 
+[Contribution guidelines for this project](hakner/Render.jpg)
+
 ### Dependencies
 * SDL2
 * DirectXMath (+ SimpleMath wrapper)
