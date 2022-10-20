@@ -8,6 +8,7 @@ Hakner is a raytracing hobby project for me to learn the ins and outs of modern 
 * SDL2
 * DirectXMath (+ SimpleMath wrapper)
 * Windows
+* STB_Image, STB_Image_Write
 
 ## License
 
