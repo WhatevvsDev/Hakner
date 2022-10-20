@@ -29,8 +29,12 @@ void hakner::AppWindow::Initialize()
 	IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	
+	// Custom Font
+	io.Fonts->AddFontFromFileTTF("C:/Hakner/Hakner/Assets/Roboto.ttf", 20.0f, nullptr);
 
     ImGui::StyleColorsDark();
+	
 
     // Setup Platform/Renderer backends
 	ImGui_ImplSDL2_InitForSDLRenderer(State->window, State->renderer);
