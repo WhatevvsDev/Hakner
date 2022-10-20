@@ -107,10 +107,4 @@
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="Assets\Staatliches - OFL.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Assets\Staatliches.ttf" />
-  </ItemGroup>
 </Project>

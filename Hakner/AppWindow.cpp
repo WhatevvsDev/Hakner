@@ -13,10 +13,12 @@ void hakner::AppWindow::Initialize()
 
 	// Initialize SDL
 	LogAssert("SDL failed to initalize!", (SDL_Init(SDL_INIT_VIDEO) == 0));
-
 	// Create window
 	State->window = SDL_CreateWindow(State->title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, State->width, State->height, SDL_WINDOW_SHOWN);
 	LogAssert("SDL failed to create window!", State->window);
+
+	SDL_ShowCursor(SDL_FALSE);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	// Creating SDL
 	State->backBuffer = new uint32_t[State->pixelCount];

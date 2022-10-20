@@ -24,6 +24,7 @@ namespace hakner
 			g_world.push_back({ { 0, 0, 0 }, {255,0,255,0}, 1.0f });
 			g_world.push_back({ { 1, 0, 0.5 }, {255,255,0,0}, 0.8f });
 
+			updateTimer.Start();
 			renderTimer.Start();
 		}
 
@@ -73,7 +74,8 @@ namespace hakner
 
 		void Renderer::Update()
 		{
-			float deltaTime = renderTimer.Delta() * 0.001f;
+			// Converted to seconds for ease of use in movement
+			float deltaTime = updateTimer.Delta() * 0.001f;
 
 			// ---------- Get move direction, align with camera, and update position ----------
 			Vector3 moveVector = Vector3{(float)moveHor, (float)moveVer, (float)moveWard};
@@ -144,8 +146,6 @@ namespace hakner
 
 		void IntersectWorld(Ray& ray, HitData& data)
 		{
-			Intersect(ray, data, g_world[0]);
-			return;
 			for (auto& currentSphere : g_world)
 			{
 				Intersect(ray, data, currentSphere);
@@ -190,6 +190,8 @@ namespace hakner
 
 		void Renderer::Render()
 		{
+			float deltaTime = renderTimer.Delta();
+
 			auto surface = AppWindow::State->backBuffer;
 			auto& window = *AppWindow::State;
 
@@ -220,13 +222,11 @@ namespace hakner
 				renderToFile = false;
 			}
 
-			ImGui::ShowMetricsWindow();
-			ImGui::ShowStyleEditor();
-
 			ImGui::SetNextWindowPos({0,0});
-			ImGui::Begin("Metrics");
+			ImGui::SetNextWindowSize({200, 80});
+			ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration);
 			
-			ImGui::Text("FPS: %f \n", 3.9f);
+			ImGui::Text(" %.2fms per frame \n", deltaTime);
 			
 			ImGui::End();
 		}

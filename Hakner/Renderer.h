@@ -61,6 +61,7 @@ namespace hakner
 			} Camera;
 
 			// ---------- Misc ----------
+			inline Timer updateTimer;
 			inline Timer renderTimer;
 			inline bool renderToFile{ false };
 		}
