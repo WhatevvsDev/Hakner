@@ -144,6 +144,8 @@ namespace hakner
 
 		void IntersectWorld(Ray& ray, HitData& data)
 		{
+			Intersect(ray, data, g_world[0]);
+			return;
 			for (auto& currentSphere : g_world)
 			{
 				Intersect(ray, data, currentSphere);
@@ -218,7 +220,15 @@ namespace hakner
 				renderToFile = false;
 			}
 
-			ImGui::ShowDemoWindow();
+			ImGui::ShowMetricsWindow();
+			ImGui::ShowStyleEditor();
+
+			ImGui::SetNextWindowPos({0,0});
+			ImGui::Begin("Metrics");
+			
+			ImGui::Text("FPS: %f \n", 3.9f);
+			
+			ImGui::End();
 		}
 
 		// ---------- CAMERA ----------

@@ -17,8 +17,6 @@ void hakner::AppWindow::Initialize()
 	// Create window
 	State->window = SDL_CreateWindow(State->title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, State->width, State->height, SDL_WINDOW_SHOWN);
 	LogAssert("SDL failed to create window!", State->window);
-	SDL_ShowCursor(SDL_FALSE);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	// Creating SDL
 	State->backBuffer = new uint32_t[State->pixelCount];
@@ -30,8 +28,7 @@ void hakner::AppWindow::Initialize()
 
 	IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	ImGuiIO& io = ImGui::GetIO();
 
     ImGui::StyleColorsDark();
 

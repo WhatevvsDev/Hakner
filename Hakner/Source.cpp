@@ -43,6 +43,8 @@ int main()
 		// Handle SDL events
 		while (SDL_PollEvent(&e)) 
 		{ 
+			ImGui_ImplSDL2_ProcessEvent(&e);
+
 			switch(e.type)
 			{
 				case SDL_QUIT:
