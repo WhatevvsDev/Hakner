@@ -7,6 +7,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+#include "Dependencies/ImGUI/imgui.h"
+
 namespace hakner
 {
 	namespace Graphics
@@ -215,6 +217,8 @@ namespace hakner
 				SaveRenderToFile();
 				renderToFile = false;
 			}
+
+			ImGui::ShowDemoWindow();
 		}
 
 		// ---------- CAMERA ----------

@@ -17,6 +17,7 @@ namespace hakner
 			// Window
 			std::string title = "Hakner Raytracer";
 			bool initialized { false };
+			bool shouldClose { false };
 
 			// SDL Related Variables
 			SDL_Renderer* renderer { nullptr };

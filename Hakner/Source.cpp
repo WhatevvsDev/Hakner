@@ -7,6 +7,10 @@
 #include "Helper.h"
 #include <SDL.h>
 
+#include "Dependencies/ImGUI/imgui.h"
+#include "Dependencies/ImGUI/imgui_impl_sdl.h"
+#include "Dependencies/ImGUI/imgui_impl_sdlrenderer.h"
+
 #ifdef main
 #undef main
 #endif main
@@ -27,25 +31,30 @@ int main()
 	
 	// ---------- Main Loop ----------
 	SDL_Event e;
-	bool quit = false; 
 	
-	while (!quit) 
+	while (!AppWindow::State->shouldClose) 
 	{ 
 		SDL_RenderClear(windowData->renderer);
+
+		ImGui_ImplSDLRenderer_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
 
 		// Handle SDL events
 		while (SDL_PollEvent(&e)) 
 		{ 
-			quit = (e.type == SDL_QUIT); 
-
 			switch(e.type)
 			{
 				case SDL_QUIT:
-					quit = true;
+					AppWindow::State->shouldClose = true;
 				break;
 				case SDL_KEYDOWN:
+				{
 					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
+					if(e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+						AppWindow::State->shouldClose = true;
 					break;
+				}
 				case SDL_KEYUP:
 					Graphics::Renderer::KeyPress(e.key.keysym.scancode, false);
 					break;
@@ -59,9 +68,15 @@ int main()
 
 		Graphics::Renderer::Render();
 
+		ImGui::Render();
+
+
 		// ---------- Copy CPU backbuffer to GPU texture, and present that on-screen ----------
 		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));
 		SDL_RenderCopy(windowData->renderer, windowData->texture, NULL, NULL);
+		SDL_RenderPresent(windowData->renderer);
+
+		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 		SDL_RenderPresent(windowData->renderer);
 	}
 

@@ -3,6 +3,10 @@
 #include <assert.h>
 #include "Helper.h"
 
+#include "Dependencies/ImGUI/imgui.h"
+#include "Dependencies/ImGUI/imgui_impl_sdl.h"
+#include "Dependencies/ImGUI/imgui_impl_sdlrenderer.h"
+
 void hakner::AppWindow::Initialize()
 {
 	State = new WindowState();
@@ -23,6 +27,17 @@ void hakner::AppWindow::Initialize()
 	// Format is ABGR8888 because of little endianness
 	State->texture = SDL_CreateTexture(State->renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, State->width, State->height);
 	LogMsg(Log::Debug, "SDL Intialized.");
+
+	IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer backends
+	ImGui_ImplSDL2_InitForSDLRenderer(State->window, State->renderer);
+    ImGui_ImplSDLRenderer_Init(State->renderer);
 
 	State->initialized = true;
 }
