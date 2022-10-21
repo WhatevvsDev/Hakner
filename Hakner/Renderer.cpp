@@ -3,6 +3,9 @@
 #include "Math.h"
 #include "Sphere.h"
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -13,17 +16,62 @@ namespace hakner
 {
 	namespace Graphics
 	{
+
+		// Tiles //
+		class RenderTile
+		{
+		public:
+			int x = { 0 };
+			int y = { 0 };
+			int width = { 8 };
+			int height = { 8 };
+
+		public:
+			RenderTile() = default;
+			RenderTile(int x, int y) : x(x), y(y) {}
+		};
+
+
+		const int tileCount = 100 * 100;
+		int availableThreads = 0;
+
+		RenderTile renderTiles[tileCount];
+
+		::std::thread* threads;
+		::std::atomic<int> nextTile{ tileCount };
+		::std::atomic<int> finishedThreads{ 0 };
+		::std::mutex raytracingM;
+		::std::condition_variable raytracingCV;
+
 		// TODO: Replace this
-		std::vector<Sphere> g_world;
+		::std::vector<Sphere> g_world;
 		bool showNormals = false;
 
 		// ---------- INITIALIZE ----------
 
+		void RaytraceThreadMain();
+
 		void Renderer::Initialize()
 		{
+			// ---------- Load Assets ----------
 			g_world.push_back({ { 0, 0, 0 }, {255,0,255,0}, 1.0f });
 			g_world.push_back({ { 1, 0, 0.5 }, {255,255,0,0}, 0.8f });
 
+			// ---------- Initialize Threads and Render Tiles ----------
+			for (int y = 0, i = 0; y < 100; y++)
+				for (int x = 0; x < 100; x++, i++)
+					renderTiles[i] = RenderTile(x * 8, y * 8);
+
+			availableThreads = std::thread::hardware_concurrency();
+			threads = new std::thread[availableThreads];
+
+			for (int i = 0; i < availableThreads; i++)
+			{
+				threads[i] = std::thread(RaytraceThreadMain);
+				printf("Created Thread %i \n", i);
+			}
+
+			// ---------- Start Profiling Timers ----------
 			updateTimer.Start();
 			renderTimer.Start();
 		}
@@ -57,7 +105,7 @@ namespace hakner
 				down = aPressed;
 				break;
 			case SDL_SCANCODE_P:
-				if(!aPressed) // Released
+				if (!aPressed) // Released
 					renderToFile = true;
 				break;
 			case SDL_SCANCODE_SPACE:
@@ -78,7 +126,7 @@ namespace hakner
 			float deltaTime = updateTimer.Delta() * 0.001f;
 
 			// ---------- Get move direction, align with camera, and update position ----------
-			Vector3 moveVector = Vector3{(float)moveHor, (float)moveVer, (float)moveWard};
+			Vector3 moveVector = Vector3{ (float)moveHor, (float)moveVer, (float)moveWard };
 			moveVector = Vector3::Transform(moveVector, Camera.GetRotationMatrix());
 
 			Camera.position += moveVector * deltaTime;
@@ -193,52 +241,80 @@ namespace hakner
 			data.color = sphere.color;
 		}
 
-		void Raytrace(Ray ray, HitData& data)
+		void RaytraceTile();
+
+		void RaytraceThreadMain()
 		{
-			IntersectWorld(ray, data);
+			while(true)
+			{
+				RaytraceTile();
+			}
+		}
+
+		// Thread safe function
+		void RaytraceTile()
+		{
+			// QoL
+			auto surface = AppWindow::State->backBuffer;
+
+			// Fetch new tile
+			int nextTileIndex = nextTile.fetch_sub(1);
+
+			// If there are no tiles left, exit
+			if (nextTileIndex < 0)
+			{
+				std::unique_lock<std::mutex> lock(raytracingM);
+				finishedThreads.fetch_add(1);
+				raytracingCV.wait(lock);
+				return;
+			}
+
+			RenderTile& currentTile = renderTiles[nextTileIndex];
+
+			// Internal offset
+			for (int iy = 0; iy < currentTile.height; iy++)
+			for (int ix = 0; ix < currentTile.width; ix++)
+			{
+				int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State->width;
+				Ray generatedRay = GeneratePinholeRay(currentTile.x + ix, currentTile.y + iy);
+				HitData data;
+
+				IntersectWorld(generatedRay, data);
+
+				if (!data.intersections)
+					surface[backBufferIndex] = Sky(generatedRay).value;
+				else if (showNormals)
+					surface[backBufferIndex] = data.color.value;
+				else
+					surface[backBufferIndex] = VectorToColor(data.normal * 0.5f + Vector3{ 0.5f }).value;
+			}
 		}
 
 		void Renderer::Render()
 		{
+			while(finishedThreads.load() < availableThreads)
+			{}
+
 			float deltaTime = renderTimer.Delta();
 
-			auto surface = AppWindow::State->backBuffer;
-			auto& window = *AppWindow::State;
-
-			for (int y = 0; y < (int)window.height; y++)
-			{
-				for (int x = 0; x < (int)window.width; x++)
-				{
-					int i = x + (y * window.width);
-
-					HitData data;
-					Ray ray = GeneratePinholeRay(x, y);
-
-					Raytrace(ray, data);
-
-					// TODO: Replace this
-					if (!data.intersections)
-						surface[i] = Sky(ray).value;
-					else if (showNormals)
-						surface[i] = data.color.value;
-					else
-						surface[i] = VectorToColor(data.normal * 0.5f + Vector3{ 0.5f }).value;
-				}
-			}
-
-			if(renderToFile)
+			if (renderToFile)
 			{
 				SaveRenderToFile();
 				renderToFile = false;
 			}
 
-			ImGui::SetNextWindowPos({0,0});
-			ImGui::SetNextWindowSize({200, 80});
+			ImGui::SetNextWindowPos({ 0,0 });
+			ImGui::SetNextWindowSize({ 200, 80 });
 			ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration);
-			
+
 			ImGui::Text(" %.2fms per frame \n", deltaTime);
-			
+
 			ImGui::End();
+
+			nextTile.store(tileCount - 1);
+			finishedThreads.store(0);
+
+			raytracingCV.notify_all();
 		}
 
 		// ---------- CAMERA ----------
@@ -248,8 +324,8 @@ namespace hakner
 			dirtyRotationMatrix = true;
 			pitch += aPitch;
 
-			if(pitch > 85) pitch = 85;
-			if(pitch < -85) pitch = -85;
+			if (pitch > 85) pitch = 85;
+			if (pitch < -85) pitch = -85;
 		}
 
 		void Renderer::CameraData::AddYaw(float aYaw)
@@ -267,7 +343,7 @@ namespace hakner
 
 		Matrix Renderer::CameraData::GetRotationMatrix()
 		{
-			if(dirtyRotationMatrix)
+			if (dirtyRotationMatrix)
 				CalculateRotationMatrix();
 
 			return rotationMatrix;
@@ -277,5 +353,6 @@ namespace hakner
 		{
 			rotationMatrix = Matrix::CreateRotationX(DirectX::XMConvertToRadians(Camera.pitch)) * Matrix::CreateRotationY(DirectX::XMConvertToRadians(Camera.yaw));
 		}
+
 	}
 }
