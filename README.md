@@ -16,7 +16,12 @@ This project is licensed under the MIT License
 
 ## Acknowledgments
 
-Inspiration, Resources
+Resources
 * [Raytracing in One Weekend](https://raytracing.github.io/)
 * [Raytracing Gems](https://www.realtimerendering.com/raytracinggems/)
 * [How to build a BVH](https://jacco.ompf2.com/2022/04/13/how-to-build-a-bvh-part-1-basics/)
+
+A thank you to
+* Jacco Bikker
+* Adam Marrs
+* Peter Shirley
