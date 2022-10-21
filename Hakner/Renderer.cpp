@@ -91,7 +91,17 @@ namespace hakner
 			stbi_write_jpg("Render.jpg", AppWindow::State->width, AppWindow::State->height, 4, AppWindow::State->backBuffer, 95);
 		}
 
-		Ray GenerateRay(int x, int y)
+		// TODO: implement these :)
+		Ray GenerateThinLensRay(int x, int y);
+		Ray GeneratePaniniRay(int x, int y);
+		Ray GenerateFisheyeRay(int x, int y);
+		Ray GenerateLensletRay(int x, int y);
+		Ray GenerateOctahedralRay(int x, int y);
+		Ray GenerateCubeMapRay(int x, int y);
+		Ray GenerateOrthographicRay(int x, int y);
+		Ray GenerateFibonacciSphereRay(int x, int y);
+
+		Ray GeneratePinholeRay(int x, int y)
 		{
 			// ---------- Generate new Ray ----------
 			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
@@ -202,7 +212,7 @@ namespace hakner
 					int i = x + (y * window.width);
 
 					HitData data;
-					Ray ray = GenerateRay(x, y);
+					Ray ray = GeneratePinholeRay(x, y);
 
 					Raytrace(ray, data);
 
