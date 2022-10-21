@@ -16,8 +16,6 @@ namespace hakner
 {
 	namespace Graphics
 	{
-
-		// Tiles //
 		class RenderTile
 		{
 		public:
@@ -30,7 +28,6 @@ namespace hakner
 			RenderTile() = default;
 			RenderTile(int x, int y) : x(x), y(y) {}
 		};
-
 
 		const int tileCount = 100 * 100;
 		int availableThreads = 0;
