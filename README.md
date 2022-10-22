@@ -23,7 +23,7 @@ Resources
 * [Raytracing Gems](https://www.realtimerendering.com/raytracinggems/)
 * [How to build a BVH](https://jacco.ompf2.com/2022/04/13/how-to-build-a-bvh-part-1-basics/)
 
-A thank you to
+Special Thanks
 * Jacco Bikker - [@j_bikker](https://twitter.com/j_bikker)
 * Adam Marrs - [@acmarrs](https://twitter.com/acmarrs)
 * Peter Shirley - [@Peter_shirley](https://twitter.com/peter_shirley)
