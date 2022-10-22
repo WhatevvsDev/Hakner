@@ -2,6 +2,7 @@
 #include "AppWindow.h"
 #include "Math.h"
 #include "Sphere.h"
+
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -142,28 +143,17 @@ namespace hakner
 			stbi_write_jpg("Render.jpg", AppWindow::State->width, AppWindow::State->height, 4, AppWindow::State->backBuffer, 95);
 		}
 
-		// TODO: implement these :)
-		Ray GenerateThinLensRay(int x, int y);
-		Ray GeneratePaniniRay(int x, int y);
-		Ray GenerateFisheyeRay(int x, int y);
-		Ray GenerateLensletRay(int x, int y);
-		Ray GenerateOctahedralRay(int x, int y);
-		Ray GenerateCubeMapRay(int x, int y);
-		Ray GenerateOrthographicRay(int x, int y);
-		Ray GenerateFibonacciSphereRay(int x, int y);
-
-		Ray GeneratePinholeRay(int x, int y)
+		Ray Renderer::GeneratePinholeRay(ScreenCoord::Pixel pixel)
 		{
 			// ---------- Generate new Ray ----------
 			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
-			x -= AppWindow::State->width / 2;
-			y -= AppWindow::State->height / 2;
+			pixel.x -= AppWindow::State->width / 2;
+			pixel.y -= AppWindow::State->height / 2;
 
-			float cameraFOV = 90.0f;
-			float tanHalfAngle = tan(cameraFOV * 0.5f);
+			float tanHalfAngle = tan(Renderer::Camera.fieldOfView * 0.5f);
 
 			float mul = tanHalfAngle / (float)AppWindow::State->width;
-			Vector3 direction = (Vector3(x * mul, -y * mul, -1));
+			Vector3 direction = (Vector3(pixel.x * mul, -pixel.y * mul, -1));
 			direction.Normalize();
 
 			// ---------- Transform ray to align with camera direction ----------
@@ -279,7 +269,7 @@ namespace hakner
 			for (int ix = 0; ix < 8; ix++)
 			{
 				int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State->width;
-				Ray generatedRay = GeneratePinholeRay(currentTile.x + ix, currentTile.y + iy);
+				Ray generatedRay = Renderer::GeneratePinholeRay(ScreenCoord::Pixel(currentTile.x + ix, currentTile.y + iy));
 				HitData data;
 
 				IntersectWorld(generatedRay, data);
