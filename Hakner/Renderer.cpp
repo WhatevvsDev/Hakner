@@ -35,7 +35,7 @@ namespace hakner
 		RenderTile renderTiles[tileCount];
 
 		::std::thread* threads;
-		::std::atomic<int> nextTile{ tileCount };
+		::std::atomic<int> nextTile{ tileCount - 1 };
 		::std::atomic<int> finishedThreads{ 0 };
 		::std::mutex raytracingM;
 		::std::condition_variable raytracingCV;
@@ -71,6 +71,12 @@ namespace hakner
 			// ---------- Start Profiling Timers ----------
 			updateTimer.Start();
 			renderTimer.Start();
+		}
+
+		void Renderer::Destroy()
+		{
+			for (int i = 0; i < availableThreads; i++)
+				threads[i].join();
 		}
 
 		// ---------- INPUT ----------
@@ -242,7 +248,7 @@ namespace hakner
 
 		void RaytraceThreadMain()
 		{
-			while(true)
+			while(!	AppWindow::State->shouldClose)
 			{
 				RaytraceTile();
 			}
@@ -269,8 +275,8 @@ namespace hakner
 			RenderTile& currentTile = renderTiles[nextTileIndex];
 
 			// Internal offset
-			for (int iy = 0; iy < currentTile.height; iy++)
-			for (int ix = 0; ix < currentTile.width; ix++)
+			for (int iy = 0; iy < 8; iy++)
+			for (int ix = 0; ix < 8; ix++)
 			{
 				int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State->width;
 				Ray generatedRay = GeneratePinholeRay(currentTile.x + ix, currentTile.y + iy);
@@ -289,8 +295,12 @@ namespace hakner
 
 		void Renderer::Render()
 		{
-			while(finishedThreads.load() < availableThreads)
-			{}
+			// While not finished rendering
+			while((finishedThreads.load() < availableThreads))
+			{
+				if(AppWindow::State->shouldClose)
+					return;
+			}
 
 			float deltaTime = renderTimer.Delta();
 

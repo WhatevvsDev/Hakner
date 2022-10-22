@@ -52,9 +52,12 @@ int main()
 				break;
 				case SDL_KEYDOWN:
 				{
-					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
 					if(e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+					{
 						AppWindow::State->shouldClose = true;
+						break;
+					}
+					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
 					break;
 				}
 				case SDL_KEYUP:
@@ -80,6 +83,8 @@ int main()
 		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 		SDL_RenderPresent(windowData->renderer);
 	}
+
+	Graphics::Renderer::Destroy();
 
 	AppWindow::Destroy();
 

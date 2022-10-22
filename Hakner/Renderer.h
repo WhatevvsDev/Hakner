@@ -21,6 +21,7 @@ namespace hakner
 		{
 			// ---------- Main Functions ----------
 			void Initialize();
+			void Destroy();
 			void Update();
 			void Render();
 
