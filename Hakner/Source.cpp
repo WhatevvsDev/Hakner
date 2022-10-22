@@ -52,9 +52,12 @@ int main()
 				break;
 				case SDL_KEYDOWN:
 				{
-					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
 					if(e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+					{
 						AppWindow::State->shouldClose = true;
+						break;
+					}
+					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
 					break;
 				}
 				case SDL_KEYUP:
@@ -76,11 +79,12 @@ int main()
 		// ---------- Copy CPU backbuffer to GPU texture, and present that on-screen ----------
 		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));
 		SDL_RenderCopy(windowData->renderer, windowData->texture, NULL, NULL);
-		SDL_RenderPresent(windowData->renderer);
 
 		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 		SDL_RenderPresent(windowData->renderer);
 	}
+
+	Graphics::Renderer::Destroy();
 
 	AppWindow::Destroy();
 
