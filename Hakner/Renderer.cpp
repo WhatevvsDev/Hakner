@@ -22,21 +22,20 @@ namespace hakner
 		public:
 			int x = { 0 };
 			int y = { 0 };
-			int width = { 8 };
-			int height = { 8 };
 
 		public:
 			RenderTile() = default;
 			RenderTile(int x, int y) : x(x), y(y) {}
 		};
 
-		const int tileCount = 100 * 100;
+		const int tileSize = 8;
+		int tileCount = -1;
 		int availableThreads = 0;
 
-		RenderTile renderTiles[tileCount];
+		RenderTile* renderTiles { nullptr };
 
 		::std::thread* threads;
-		::std::atomic<int> nextTile{ tileCount - 1 };
+		::std::atomic<int> nextTile{ -1 };
 		::std::atomic<int> finishedThreads{ 0 };
 		::std::mutex raytracingM;
 		::std::condition_variable raytracingCV;
@@ -56,8 +55,15 @@ namespace hakner
 			g_world.push_back({ { 1, 0, 0.5 }, {255,255,0,0}, 0.8f });
 
 			// ---------- Initialize Threads and Render Tiles ----------
-			for (int y = 0, i = 0; y < 100; y++)
-				for (int x = 0; x < 100; x++, i++)
+			int tileCountX = AppWindow::State->width / tileSize;
+			int tileCountY = AppWindow::State->height / tileSize;
+
+			tileCount = tileCountX * tileCountY;
+
+			renderTiles = new RenderTile[tileCount];
+
+			for (int y = 0, i = 0; y < tileCountY; y++)
+				for (int x = 0; x < tileCountX; x++, i++)
 					renderTiles[i] = RenderTile(x * 8, y * 8);
 
 			availableThreads = std::thread::hardware_concurrency();
@@ -173,11 +179,7 @@ namespace hakner
 			return { (unsigned char)vColor.x, (unsigned char)vColor.y, (unsigned char)vColor.z, 0 };
 		}
 
-		Color VectorToColor(Vector3 v);
-		Color VectorToColor(Vector4 v);
-
 		// Assuming vector is 0.0 -> 1.0
-		Color VectorToColor(Vector3 v) { return VectorToColor({ v.x, v.y, v.z, 0.0f }); };
 		Color VectorToColor(Vector4 v)
 		{
 			v.x *= 255;
@@ -192,6 +194,7 @@ namespace hakner
 
 			return { r,g,b,a };
 		}
+		Color VectorToColor(Vector3 v) { return VectorToColor({ v.x, v.y, v.z, 0.0f }); };
 
 		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
 
