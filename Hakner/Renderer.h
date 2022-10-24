@@ -18,8 +18,16 @@ namespace hakner
 			float distance { INFINITY };
 		};
 
+		// TODO: do this properly
+		struct Sphere;
+
+		void RaytraceThreadMain();
+		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
+		void RaytraceTile();
+
 		namespace Renderer
 		{
+
 			// ---------- Main Functions ----------
 			void Initialize();
 			void Destroy();

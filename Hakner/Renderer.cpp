@@ -46,8 +46,6 @@ namespace hakner
 
 		// ---------- INITIALIZE ----------
 
-		void RaytraceThreadMain();
-
 		void Renderer::Initialize()
 		{
 			// ---------- Load Assets ----------
@@ -196,7 +194,6 @@ namespace hakner
 		}
 		Color VectorToColor(Vector3 v) { return VectorToColor({ v.x, v.y, v.z, 0.0f }); };
 
-		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
 
 		void IntersectWorld(Ray& ray, HitData& data)
 		{
@@ -236,8 +233,6 @@ namespace hakner
 			data.intersections++;
 			data.color = sphere.color;
 		}
-
-		void RaytraceTile();
 
 		void RaytraceThreadMain()
 		{
