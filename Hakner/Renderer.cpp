@@ -290,10 +290,8 @@ namespace hakner
 		{
 			// While not finished rendering
 			while((finishedThreads.load() < availableThreads))
-			{
 				if(AppWindow::State->shouldClose)
 					return;
-			}
 
 			float deltaTime = renderTimer.Delta();
 
