@@ -678,6 +678,12 @@ inline Vector3 Vector3::operator- () const noexcept
     return R;
 }
 
+inline float Vector3::operator[] (int index) noexcept
+{
+    float data[] = {x,y,z};
+    return data[index];
+}
+
 //------------------------------------------------------------------------------
 // Binary operators
 //------------------------------------------------------------------------------

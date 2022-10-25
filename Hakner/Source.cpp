@@ -75,7 +75,6 @@ int main()
 
 		ImGui::Render();
 
-
 		// ---------- Copy CPU backbuffer to GPU texture, and present that on-screen ----------
 		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));
 		SDL_RenderCopy(windowData->renderer, windowData->texture, NULL, NULL);

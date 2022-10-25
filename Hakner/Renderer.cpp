@@ -2,6 +2,8 @@
 #include "AppWindow.h"
 #include "Math.h"
 #include "Sphere.h"
+#include "AccelerationStructure.h"
+
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -21,42 +23,59 @@ namespace hakner
 		public:
 			int x = { 0 };
 			int y = { 0 };
-			int width = { 8 };
-			int height = { 8 };
 
 		public:
 			RenderTile() = default;
 			RenderTile(int x, int y) : x(x), y(y) {}
 		};
 
-		const int tileCount = 100 * 100;
+		const int tileSize = 8;
+		int tileCount = -1;
 		int availableThreads = 0;
 
-		RenderTile renderTiles[tileCount];
+		RenderTile* renderTiles { nullptr };
 
 		::std::thread* threads;
-		::std::atomic<int> nextTile{ tileCount - 1 };
-		::std::atomic<int> finishedThreads{ 0 };
-		::std::mutex raytracingM;
-		::std::condition_variable raytracingCV;
+		::std::atomic<int> nextTile{ -1 };
+		::std::atomic<bool> finishedRendering{ false };
+		::std::mutex tileM;
+		::std::condition_variable tileCV;
+
+		BVHAS* accelStructure { nullptr };
 
 		// TODO: Replace this
 		::std::vector<Sphere> g_world;
 		bool showNormals = false;
 
-		// ---------- INITIALIZE ----------
+		Vector3 activeRenderPosition;
+		Matrix activeRenderMatrix;
 
-		void RaytraceThreadMain();
+		// ---------- INITIALIZE ----------
 
 		void Renderer::Initialize()
 		{
 			// ---------- Load Assets ----------
-			g_world.push_back({ { 0, 0, 0 }, {255,0,255,0}, 1.0f });
-			g_world.push_back({ { 1, 0, 0.5 }, {255,255,0,0}, 0.8f });
+
+			for(int z = 0; z < 100; z++)
+			{
+				for(int x = 0; x < 100; x++)
+				{
+					g_world.push_back({ { (float)x, 0, (float)z }, {255,255,0,0}, 0.4f });
+				}
+			}
+
+			accelStructure = new BVHAS(g_world);
 
 			// ---------- Initialize Threads and Render Tiles ----------
-			for (int y = 0, i = 0; y < 100; y++)
-				for (int x = 0; x < 100; x++, i++)
+			int tileCountX = AppWindow::State->width / tileSize;
+			int tileCountY = AppWindow::State->height / tileSize;
+
+			tileCount = tileCountX * tileCountY;
+
+			renderTiles = new RenderTile[tileCount];
+
+			for (int y = 0, i = 0; y < tileCountY; y++)
+				for (int x = 0; x < tileCountX; x++, i++)
 					renderTiles[i] = RenderTile(x * 8, y * 8);
 
 			availableThreads = std::thread::hardware_concurrency();
@@ -125,14 +144,14 @@ namespace hakner
 
 		void Renderer::Update()
 		{
-			// Converted to seconds for ease of use in movement
+			// ---------- Converted to seconds for ease of use in movement ---------- 
 			float deltaTime = updateTimer.Delta() * 0.001f;
 
 			// ---------- Get move direction, align with camera, and update position ----------
 			Vector3 moveVector = Vector3{ (float)moveHor, (float)moveVer, (float)moveWard };
 			moveVector = Vector3::Transform(moveVector, Camera.GetRotationMatrix());
 
-			Camera.position += moveVector * deltaTime;
+			Camera.position += moveVector * 20.0f * deltaTime;
 		}
 
 		// ---------- RENDERING ----------
@@ -142,34 +161,23 @@ namespace hakner
 			stbi_write_jpg("Render.jpg", AppWindow::State->width, AppWindow::State->height, 4, AppWindow::State->backBuffer, 95);
 		}
 
-		// TODO: implement these :)
-		Ray GenerateThinLensRay(int x, int y);
-		Ray GeneratePaniniRay(int x, int y);
-		Ray GenerateFisheyeRay(int x, int y);
-		Ray GenerateLensletRay(int x, int y);
-		Ray GenerateOctahedralRay(int x, int y);
-		Ray GenerateCubeMapRay(int x, int y);
-		Ray GenerateOrthographicRay(int x, int y);
-		Ray GenerateFibonacciSphereRay(int x, int y);
-
-		Ray GeneratePinholeRay(int x, int y)
+		Ray Renderer::GeneratePinholeRay(ScreenCoord::Pixel pixel)
 		{
 			// ---------- Generate new Ray ----------
 			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
-			x -= AppWindow::State->width / 2;
-			y -= AppWindow::State->height / 2;
+			pixel.x -= AppWindow::State->width / 2;
+			pixel.y -= AppWindow::State->height / 2;
 
-			float cameraFOV = 90.0f;
-			float tanHalfAngle = tan(cameraFOV * 0.5f);
+			float tanHalfAngle = tan(Renderer::Camera.fieldOfView * 0.5f);
 
 			float mul = tanHalfAngle / (float)AppWindow::State->width;
-			Vector3 direction = (Vector3(x * mul, -y * mul, -1));
+			Vector3 direction = (Vector3(pixel.x * mul, -pixel.y * mul, -1));
 			direction.Normalize();
 
 			// ---------- Transform ray to align with camera direction ----------
-			direction = Vector3::Transform(direction, Renderer::Camera.GetRotationMatrix());
+			direction = Vector3::Transform(direction, activeRenderMatrix);
 
-			return { Renderer::Camera.position, direction };
+			return { activeRenderPosition, direction };
 		}
 
 		Color Sky(Ray ray)
@@ -183,11 +191,7 @@ namespace hakner
 			return { (unsigned char)vColor.x, (unsigned char)vColor.y, (unsigned char)vColor.z, 0 };
 		}
 
-		Color VectorToColor(Vector3 v);
-		Color VectorToColor(Vector4 v);
-
 		// Assuming vector is 0.0 -> 1.0
-		Color VectorToColor(Vector3 v) { return VectorToColor({ v.x, v.y, v.z, 0.0f }); };
 		Color VectorToColor(Vector4 v)
 		{
 			v.x *= 255;
@@ -202,49 +206,18 @@ namespace hakner
 
 			return { r,g,b,a };
 		}
-
-		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
+		Color VectorToColor(Vector3 v) { return VectorToColor({ v.x, v.y, v.z, 0.0f }); };
 
 		void IntersectWorld(Ray& ray, HitData& data)
 		{
+			accelStructure->IntersectBVH(ray,data);
+
+			return;
 			for (auto& currentSphere : g_world)
 			{
-				Intersect(ray, data, currentSphere);
+				currentSphere.Intersect(ray, data);
 			}
 		}
-
-		void Intersect(Ray& ray, HitData& data, Sphere& sphere)
-		{
-			Vector3 oc = ray.origin - sphere.position;
-			float half_b = oc.Dot(ray.direction);
-			float c = oc.LengthSquared() - sphere.GetRadiusSquared();
-			float discriminant = half_b * half_b - c;
-
-			if (discriminant < 0)
-				return;
-
-			float sqrtd = sqrtf(discriminant);
-
-			// Find the nearest root that lies in the acceptable range.
-			float root = (-half_b - sqrtd);
-			if (root < ray.min || ray.max < root)
-			{
-				root = (-half_b + sqrtd);
-				if (root < ray.min || ray.max < root)
-					return;
-			}
-
-			if (root > data.distance)
-				return;
-
-			data.distance = root;
-			data.hitPosition = ray.At(data.distance);
-			data.normal = (data.hitPosition - sphere.position);
-			data.intersections++;
-			data.color = sphere.color;
-		}
-
-		void RaytraceTile();
 
 		void RaytraceThreadMain()
 		{
@@ -266,9 +239,15 @@ namespace hakner
 			// If there are no tiles left, exit
 			if (nextTileIndex < 0)
 			{
-				std::unique_lock<std::mutex> lock(raytracingM);
-				finishedThreads.fetch_add(1);
-				raytracingCV.wait(lock);
+				std::unique_lock<std::mutex> lock(tileM);
+
+				if(nextTileIndex == -(availableThreads + 1))
+				{
+					finishedRendering.store(true);
+					tileCV.notify_all();
+				}
+
+				tileCV.wait(lock, [](){ return !finishedRendering.load(); });
 				return;
 			}
 
@@ -279,11 +258,13 @@ namespace hakner
 			for (int ix = 0; ix < 8; ix++)
 			{
 				int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State->width;
-				Ray generatedRay = GeneratePinholeRay(currentTile.x + ix, currentTile.y + iy);
+				Ray generatedRay = Renderer::GeneratePinholeRay(ScreenCoord::Pixel(currentTile.x + ix, currentTile.y + iy));
 				HitData data;
 
 				IntersectWorld(generatedRay, data);
 
+				//surface[backBufferIndex] = VectorToColor(Vector3(data.bvhIntersections / 16.0f, (data.intersections / 16.0f), 0.0f)).value;
+				
 				if (!data.intersections)
 					surface[backBufferIndex] = Sky(generatedRay).value;
 				else if (showNormals)
@@ -296,7 +277,7 @@ namespace hakner
 		void Renderer::Render()
 		{
 			// While not finished rendering
-			while((finishedThreads.load() < availableThreads))
+			while(!finishedRendering.load())
 			{
 				if(AppWindow::State->shouldClose)
 					return;
@@ -318,10 +299,12 @@ namespace hakner
 
 			ImGui::End();
 
-			nextTile.store(tileCount - 1);
-			finishedThreads.store(0);
+			activeRenderMatrix = Renderer::Camera.GetRotationMatrix();
+			activeRenderPosition = Renderer::Camera.position;
 
-			raytracingCV.notify_all();
+			finishedRendering.store(false);
+			nextTile.store(tileCount - 1);
+			tileCV.notify_all();
 		}
 
 		// ---------- CAMERA ----------

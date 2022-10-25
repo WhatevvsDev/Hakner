@@ -3,6 +3,7 @@
 #include "Math.h"
 #include "SDL.h"
 #include "Timer.h"
+#include "ScreenCoordinates.h"
 
 namespace hakner
 {
@@ -14,22 +15,43 @@ namespace hakner
 			Vector3 normal { 0, 0, 0 };
 			Vector3 hitPosition { 0, 0, 0};
 			int intersections { 0 };
+			int bvhIntersections { 0 };
 			float distance { INFINITY };
 		};
 
+		// TODO: do this properly
+		struct Sphere;
+
+		void RaytraceThreadMain();
+		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
+		void RaytraceTile();
+
 		namespace Renderer
 		{
+
 			// ---------- Main Functions ----------
 			void Initialize();
 			void Destroy();
 			void Update();
 			void Render();
 
-			// ---------- Initialize Window and Renderer ----------
+			// ---------- Ray Generation Functions ----------
+			// TODO: implement these :)
+			Ray GeneratePinholeRay(ScreenCoord::Pixel pixel);
+			Ray GenerateThinLensRay(ScreenCoord::UV uv);
+			Ray GeneratePaniniRay(ScreenCoord::Pixel pixel);
+			Ray GenerateFisheyeRay(ScreenCoord::Pixel pixel);
+			Ray GenerateLensletRay(ScreenCoord::UV uv);
+			Ray GenerateOctahedralRay(ScreenCoord::UV uv);
+			Ray GenerateCubeMapRay(ScreenCoord::Pixel);
+			Ray GenerateOrthographicRay(ScreenCoord::NDC ndc);
+			Ray GenerateFibonacciSphereRay(ScreenCoord::UV uv);
+
+
+			// ---------- Input ----------
 			void MouseMove(int aDeltaX, int aDeltaY);
 			void KeyPress(SDL_Scancode aKey, bool aPressed);
 
-			// ---------- Inputs ----------
 			// TODO: Replace this
 			inline bool left = false;
 			inline bool right = false;
@@ -46,6 +68,7 @@ namespace hakner
 			{
 				Vector3 position{ 0, 0, 10};
 				Vector3 lookAt { 0, 0, 0};
+				float fieldOfView { 90.0f };
 
 				void AddPitch(float aPitch);
 				void AddYaw(float aYaw);
