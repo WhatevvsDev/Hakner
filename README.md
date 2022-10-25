@@ -4,7 +4,7 @@ Hakner is a raytracing hobby project for me to learn the ins and outs of modern 
 
 # Latest Render
 
-![Latest Render](../master/Hakner/Render.jpg)
+![Latest Render](../master/Hakner/Render.jpg?)
 
 ### Dependencies
 * SDL2
