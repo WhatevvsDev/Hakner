@@ -211,12 +211,6 @@ namespace hakner
 		void IntersectWorld(Ray& ray, HitData& data)
 		{
 			accelStructure->IntersectBVH(ray,data);
-
-			return;
-			for (auto& currentSphere : g_world)
-			{
-				currentSphere.Intersect(ray, data);
-			}
 		}
 
 		void RaytraceThreadMain()

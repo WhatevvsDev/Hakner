@@ -69,11 +69,11 @@ namespace hakner
 			BVHNode* bvhNodes{ nullptr };
 			std::vector<Sphere>& target;
 
-			void UpdateBVHNodeBounds(BVHNode& aNode);
+			void UpdateBVHNodeBounds(unsigned int aNodeIdx);
 
-			void SubdivideBVHNode(BVHNode& aNode);
+			void SubdivideBVHNode(unsigned int aNodeIdx);
 
-			void IntersectBVH(Ray& ray, HitData& data, BVHNode& node);
+			void IntersectBVH(Ray& aRay, HitData& aData, unsigned int aNodeIdx);
 		};
 	}
 }
