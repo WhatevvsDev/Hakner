@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AccelerationStructure.cpp" />
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="Dependencies\ImGUI\imgui.cpp" />
     <ClCompile Include="Dependencies\ImGUI\imgui_demo.cpp" />
@@ -23,6 +24,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ScreenCoordinates.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +37,7 @@
     <ClInclude Include="Dependencies\ImGUI\imstb_textedit.h" />
     <ClInclude Include="Dependencies\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="AccelerationStructure.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="ScreenCoordinates.h" />

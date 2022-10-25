@@ -15,6 +15,7 @@ namespace hakner
 			Vector3 normal { 0, 0, 0 };
 			Vector3 hitPosition { 0, 0, 0};
 			int intersections { 0 };
+			int bvhIntersections { 0 };
 			float distance { INFINITY };
 		};
 
