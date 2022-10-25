@@ -21,19 +21,23 @@ namespace hakner
 			// ---------- Create array big enough to hold all possible BVH Nodes ---------- 
 
 			// ---------- Create initial BVH Node ---------- 
-			BVHNode& start = bvhNodes[0];
-			start.firstPrimitive = 0;
-			start.primitiveCount = aTarget.size();
+			unsigned int startIdx = 0;
+			BVHNode& startNode = bvhNodes[startIdx];
+			startNode.firstPrimitive = 0;
+			startNode.primitiveCount = aTarget.size();
 
 			// ---------- Update AABB Bounds of initial node ---------- 
-			UpdateBVHNodeBounds(start);
+			UpdateBVHNodeBounds(startIdx);
 
 			// ---------- Begin recursive subdividing ---------- 
-			SubdivideBVHNode(start);
+			SubdivideBVHNode(startIdx);
 		}
 
-		void BVHAS::UpdateBVHNodeBounds(BVHNode& aNode)
+		void BVHAS::UpdateBVHNodeBounds(unsigned int aNodeIdx)
 		{
+			// QoL
+			BVHNode& aNode = bvhNodes[aNodeIdx];
+
 			// ---------- Set bounds to extreme values ---------- 
 			aNode.AABBMin = Vector3(1e30f);
 			aNode.AABBMax = Vector3(-1e30f);
@@ -52,9 +56,12 @@ namespace hakner
 			}
 		}
 
-		void BVHAS::SubdivideBVHNode(BVHNode& aNode)
+		void BVHAS::SubdivideBVHNode(unsigned int aNodeIdx)
 		{
-						// ---------- Prevent nodes containing only 1 primitive ---------- 
+			// QoL
+			BVHNode& aNode = bvhNodes[aNodeIdx];
+
+			// ---------- Prevent nodes containing only 1 primitive ---------- 
 			if (aNode.primitiveCount <= 2) return;
 
 			// ---------- Calculate largest axis ---------- 
@@ -91,10 +98,11 @@ namespace hakner
 				return;
 
 			// create child nodes
-			aNode.leftNodeIdx = nodesUsed;
 
-			BVHNode& left  = bvhNodes[nodesUsed + 0];
-			BVHNode& right = bvhNodes[nodesUsed + 1];
+			int leftIdx = nodesUsed;
+			aNode.leftNodeIdx = leftIdx;
+			BVHNode& left  = bvhNodes[leftIdx];
+			BVHNode& right = bvhNodes[leftIdx + 1];
 
 			left.firstPrimitive = aNode.firstPrimitive;
 			left.primitiveCount = leftCount;
@@ -103,35 +111,38 @@ namespace hakner
 			nodesUsed += 2;
 
 			aNode.primitiveCount = 0;
-			UpdateBVHNodeBounds(left);
-			UpdateBVHNodeBounds(right);
+			UpdateBVHNodeBounds(leftIdx);
+			UpdateBVHNodeBounds(leftIdx + 1);
 
 			// recurse
-			SubdivideBVHNode(left);
-			SubdivideBVHNode(right);
+			SubdivideBVHNode(leftIdx);
+			SubdivideBVHNode(leftIdx + 1);
 		}
 
-		void BVHAS::IntersectBVH(Ray& ray, HitData& data)
+		void BVHAS::IntersectBVH(Ray& aRay, HitData& aData)
 		{
-			IntersectBVH(ray, data, bvhNodes[0]);
+			IntersectBVH(aRay, aData, 0);
 		}	
 
-		void BVHAS::IntersectBVH(Ray& ray, HitData& data, BVHNode& node)
+		void BVHAS::IntersectBVH(Ray& aRay, HitData& aData, unsigned int aNodeIdx)
 		{
-			if (!IntersectAABB( ray, node.AABBMin, node.AABBMax )) 
+			// QoL
+			BVHNode& aNode = bvhNodes[aNodeIdx];
+
+			if (!IntersectAABB(aRay, aNode.AABBMin, aNode.AABBMax)) 
 				return;
 
-			data.bvhIntersections++;
+			aData.bvhIntersections++;
 
-			if (node.primitiveCount != 0)
+			if (aNode.primitiveCount != 0)
 			{
-				for (unsigned int i = 0; i < node.primitiveCount; i++ )
-					target[node.firstPrimitive + i].Intersect( ray, data);
+				for (unsigned int i = 0; i < aNode.primitiveCount; i++ )
+					target[aNode.firstPrimitive + i].Intersect( aRay, aData);
 			}
 			else
 			{
-				IntersectBVH( ray, data, bvhNodes[node.leftNodeIdx]);
-				IntersectBVH( ray, data, bvhNodes[ node.leftNodeIdx + 1]);
+				IntersectBVH(aRay, aData, aNode.leftNodeIdx);
+				IntersectBVH(aRay, aData, aNode.leftNodeIdx + 1);
 			}
 		}
 	}
