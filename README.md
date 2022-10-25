@@ -2,6 +2,10 @@
 
 Hakner is a raytracing hobby project for me to learn the ins and outs of modern raytracing on both CPU and later GPU.
 
+### Current Features
+* Sphere Intersection
+* BVH
+
 # Latest Render
 
 ![Latest Render](../master/Hakner/Render.jpg?)
