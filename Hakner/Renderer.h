@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Math.h"
 #include "SDL.h"
 #include "Timer.h"
@@ -23,7 +22,6 @@ namespace hakner
 		struct Sphere;
 
 		void RaytraceThreadMain();
-		void Intersect(Ray& ray, HitData& data, Sphere& sphere);
 		void RaytraceTile();
 
 		namespace Renderer
@@ -37,15 +35,15 @@ namespace hakner
 
 			// ---------- Ray Generation Functions ----------
 			// TODO: implement these :)
-			Ray GeneratePinholeRay(ScreenCoord::Pixel pixel);
-			Ray GenerateThinLensRay(ScreenCoord::UV uv);
-			Ray GeneratePaniniRay(ScreenCoord::Pixel pixel);
-			Ray GenerateFisheyeRay(ScreenCoord::Pixel pixel);
-			Ray GenerateLensletRay(ScreenCoord::UV uv);
-			Ray GenerateOctahedralRay(ScreenCoord::UV uv);
-			Ray GenerateCubeMapRay(ScreenCoord::Pixel);
-			Ray GenerateOrthographicRay(ScreenCoord::NDC ndc);
-			Ray GenerateFibonacciSphereRay(ScreenCoord::UV uv);
+			Ray GeneratePinholeRay(ScreenCoord::Pixel aPixel);
+			Ray GenerateThinLensRay(ScreenCoord::UV aUV);
+			Ray GeneratePaniniRay(ScreenCoord::Pixel aPixel);
+			Ray GenerateFisheyeRay(ScreenCoord::Pixel aPixel);
+			Ray GenerateLensletRay(ScreenCoord::UV aUV);
+			Ray GenerateOctahedralRay(ScreenCoord::UV aUV);
+			Ray GenerateCubeMapRay(ScreenCoord::Pixel aPixel);
+			Ray GenerateOrthographicRay(ScreenCoord::NDC aNDC);
+			Ray GenerateFibonacciSphereRay(ScreenCoord::UV aUV);
 
 
 			// ---------- Input ----------

@@ -161,17 +161,17 @@ namespace hakner
 			stbi_write_jpg("Render.jpg", AppWindow::State->width, AppWindow::State->height, 4, AppWindow::State->backBuffer, 95);
 		}
 
-		Ray Renderer::GeneratePinholeRay(ScreenCoord::Pixel pixel)
+		Ray Renderer::GeneratePinholeRay(ScreenCoord::Pixel aPixel)
 		{
 			// ---------- Generate new Ray ----------
 			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
-			pixel.x -= AppWindow::State->width / 2;
-			pixel.y -= AppWindow::State->height / 2;
+			aPixel.x -= AppWindow::State->width / 2;
+			aPixel.y -= AppWindow::State->height / 2;
 
 			float tanHalfAngle = tan(Renderer::Camera.fieldOfView * 0.5f);
 
 			float mul = tanHalfAngle / (float)AppWindow::State->width;
-			Vector3 direction = (Vector3(pixel.x * mul, -pixel.y * mul, -1));
+			Vector3 direction = (Vector3(aPixel.x * mul, -aPixel.y * mul, -1));
 			direction.Normalize();
 
 			// ---------- Transform ray to align with camera direction ----------
@@ -180,9 +180,9 @@ namespace hakner
 			return { activeRenderPosition, direction };
 		}
 
-		Color Sky(Ray ray)
+		Color Sky(Ray aRay)
 		{
-			float t = 0.5f * (ray.direction.y + 1.0f);
+			float t = 0.5f * (aRay.direction.y + 1.0f);
 
 			// Lerp between colors for sky color
 			Vector3 vColor = (1.0f - t) * Vector3(1.0f, 0.8f, 0.65f) + t * Vector3(0.4f, 0.6f, 1.0f);
@@ -192,25 +192,25 @@ namespace hakner
 		}
 
 		// Assuming vector is 0.0 -> 1.0
-		Color VectorToColor(Vector4 v)
+		Color VectorToColor(Vector4 aVector)
 		{
-			v.x *= 255;
-			v.y *= 255;
-			v.z *= 255;
-			v.w *= 255;
+			aVector.x *= 255;
+			aVector.y *= 255;
+			aVector.z *= 255;
+			aVector.w *= 255;
 
-			unsigned char r = (unsigned char)v.x;
-			unsigned char g = (unsigned char)v.y;
-			unsigned char b = (unsigned char)v.z;
-			unsigned char a = (unsigned char)v.w;
+			unsigned char r = (unsigned char)aVector.x;
+			unsigned char g = (unsigned char)aVector.y;
+			unsigned char b = (unsigned char)aVector.z;
+			unsigned char a = (unsigned char)aVector.w;
 
 			return { r,g,b,a };
 		}
-		Color VectorToColor(Vector3 v) { return VectorToColor({ v.x, v.y, v.z, 0.0f }); };
+		Color VectorToColor(Vector3 aVector) { return VectorToColor({ aVector.x, aVector.y, aVector.z, 0.0f }); };
 
-		void IntersectWorld(Ray& ray, HitData& data)
+		void IntersectWorld(Ray& aRay, HitData& aData)
 		{
-			accelStructure->IntersectBVH(ray,data);
+			accelStructure->IntersectBVH(aRay,aData);
 		}
 
 		void RaytraceThreadMain()
