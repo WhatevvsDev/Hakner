@@ -55,9 +55,9 @@ namespace hakner
 		{
 			// ---------- Load Assets ----------
 
-			for (int z = 0; z < 10; z++)
+			for (int z = 0; z < 100; z++)
 			{
-				for (int x = 0; x < 10; x++)
+				for (int x = 0; x < 100; x++)
 				{
 					g_world.push_back({ { (float)x, 0, (float)z }, {255,255,0,0}, 0.4f });
 				}

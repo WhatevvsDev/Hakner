@@ -4,6 +4,7 @@
 #include "Math.h"
 #include "Sphere.h"
 #include <vector>
+#include <memory>
 
 using namespace DirectX::SimpleMath;
 
@@ -13,17 +14,22 @@ namespace hakner
 	{
 		BVHAS::BVHAS(std::vector<Sphere>& aTarget) : target(aTarget)
 		{
-			int maxNodeCount = (aTarget.size() * 2) - 1;
-
-			bvhNodes = new BVHNode[maxNodeCount]; // TODO: align this
-			nodesUsed += 2; // For (future) alignment
+			int maxNodeCount = (aTarget.size() * 2);
 
 			// ---------- Create array big enough to hold all possible BVH Nodes ---------- 
+			bvhNodes = (BVHNode*)_aligned_malloc(sizeof(BVHNode) * maxNodeCount, 32);
+
+			if(!bvhNodes)
+			{
+				LogAssert("Failed to create aligned memory for BVH Nodes", bvhNodes);
+				return;
+			}
+			nodesUsed += 2; // Is 2 for alignment
 
 			// ---------- Create initial BVH Node ---------- 
 			unsigned int startIdx = 0;
 			BVHNode& startNode = bvhNodes[startIdx];
-			startNode.firstPrimitive = 0;
+			startNode.firstIndex = 0;
 			startNode.primitiveCount = aTarget.size();
 
 			// ---------- Update AABB Bounds of initial node ---------- 
@@ -42,7 +48,7 @@ namespace hakner
 			aNode.AABBMin = Vector3(1e30f);
 			aNode.AABBMax = Vector3(-1e30f);
 
-			unsigned int rangeStart = aNode.firstPrimitive;
+			unsigned int rangeStart = aNode.firstIndex;
 			for (unsigned int i = 0; i < aNode.primitiveCount; i++)
 			{
 				unsigned int finalIndex = rangeStart + i;
@@ -62,7 +68,8 @@ namespace hakner
 			BVHNode& aNode = bvhNodes[aNodeIdx];
 
 			// ---------- Prevent nodes containing only 1 primitive ---------- 
-			if (aNode.primitiveCount <= 2) return;
+			if (aNode.primitiveCount <= 2) 
+				return;
 
 			// ---------- Calculate largest axis ---------- 
 			Vector3 extent = aNode.AABBMax - aNode.AABBMin;
@@ -75,8 +82,28 @@ namespace hakner
 
 			float splitPos = aNode.AABBMin[axis] + extent[axis] * 0.5f;
 
+			// determine split axis using SAH
+			int bestAxis = -1;
+			float bestPos = 0;
+			float bestCost = 1e30f;
+
+			/*
+			// For each axis and each primitive
+			for( int axis = 0; axis < 3; axis++ ) 
+			for( unsigned int i = 0; i < aNode.primitiveCount; i++ )
+			{
+				Sphere& primitive = target[aNode.leftNodeIdx + i];
+				float candidatePos = triangle.centroid[axis];
+				float cost = EvaluateSAH( node, axis, candidatePos );
+				if (cost < bestCost) 
+					bestPos = candidatePos, bestAxis = axis, bestCost = cost;
+			}
+			int axis = bestAxis;
+			float splitPos = bestPos;
+			*/
+
 			// in-place partition
-			int i = aNode.firstPrimitive;
+			int i = aNode.firstIndex;
 			int j = i + aNode.primitiveCount - 1;
 
 			while (i <= j)
@@ -93,23 +120,23 @@ namespace hakner
 			}
 
 			// abort split if one of the sides is empty
-			int leftCount = i - aNode.firstPrimitive;
+			int leftCount = i - aNode.firstIndex;
 			if (leftCount == 0 || leftCount == aNode.primitiveCount) 
 				return;
 
 			// create child nodes
 
 			int leftIdx = nodesUsed;
-			aNode.leftNodeIdx = leftIdx;
 			BVHNode& left  = bvhNodes[leftIdx];
 			BVHNode& right = bvhNodes[leftIdx + 1];
 
-			left.firstPrimitive = aNode.firstPrimitive;
+			left.firstIndex = aNode.firstIndex;
 			left.primitiveCount = leftCount;
-			right.firstPrimitive = i; // couldn't this be left[firstprim] + leftCount?
+			right.firstIndex = i; // couldn't this be left[firstprim] + leftCount?
 			right.primitiveCount = aNode.primitiveCount - leftCount;
 			nodesUsed += 2;
 
+			aNode.firstIndex = leftIdx;
 			aNode.primitiveCount = 0;
 			UpdateBVHNodeBounds(leftIdx);
 			UpdateBVHNodeBounds(leftIdx + 1);
@@ -137,12 +164,12 @@ namespace hakner
 			if (aNode.primitiveCount != 0)
 			{
 				for (unsigned int i = 0; i < aNode.primitiveCount; i++ )
-					target[aNode.firstPrimitive + i].Intersect( aRay, aData);
+					target[aNode.firstIndex + i].Intersect( aRay, aData);
 			}
 			else
 			{
-				IntersectBVH(aRay, aData, aNode.leftNodeIdx);
-				IntersectBVH(aRay, aData, aNode.leftNodeIdx + 1);
+				IntersectBVH(aRay, aData, aNode.firstIndex);
+				IntersectBVH(aRay, aData, aNode.firstIndex + 1);
 			}
 		}
 	}

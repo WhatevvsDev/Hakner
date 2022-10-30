@@ -18,9 +18,8 @@ namespace hakner
 		struct BVHNode
 		{
 			Vector3 AABBMin, AABBMax;
-			unsigned int firstPrimitive;
+			unsigned int firstIndex; // Relates to nodes or primitives depending on primitiveCount
 			unsigned int primitiveCount;
-			unsigned int leftNodeIdx;
 		};
 
 		inline Vector3 VectorMin(Vector3& a, Vector3& b)
@@ -58,7 +57,7 @@ namespace hakner
 		}
 
 		// BVH Acceleration Structure
-		struct BVHAS
+		__declspec(align(32)) struct BVHAS
 		{
 			void IntersectBVH(Ray& ray, HitData& data);
 			BVHAS(std::vector<Sphere>& aTarget);
