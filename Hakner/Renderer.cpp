@@ -256,8 +256,6 @@ namespace hakner
 				HitData data;
 
 				IntersectWorld(generatedRay, data);
-
-				//surface[backBufferIndex] = VectorToColor(Vector3(data.bvhIntersections / 16.0f, (data.intersections / 16.0f), 0.0f)).value;
 				
 				if (!data.intersections)
 					surface[backBufferIndex] = Sky(generatedRay).value;
@@ -270,6 +268,12 @@ namespace hakner
 
 		void Renderer::Render()
 		{
+			// ---------- Reseting threads for next frame ----------
+			// This happens here because we have to wait for the app to present before resetting the render
+			finishedRendering.store(false);
+			nextTile.store(tileCount - 1);
+			tileCV.notify_all();
+
 			// While not finished rendering
 			while(!finishedRendering.load())
 			{
@@ -295,10 +299,6 @@ namespace hakner
 
 			activeRenderMatrix = Renderer::Camera.GetRotationMatrix();
 			activeRenderPosition = Renderer::Camera.position;
-
-			finishedRendering.store(false);
-			nextTile.store(tileCount - 1);
-			tileCV.notify_all();
 		}
 
 		// ---------- CAMERA ----------
