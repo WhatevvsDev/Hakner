@@ -25,7 +25,7 @@ namespace hakner
 			SDL_Renderer* renderer { nullptr };
 			SDL_Window* window { nullptr };
 			SDL_Texture* texture { nullptr };
-		} *State;
+		} State;
 
 		void Initialize();
 		void Destroy();

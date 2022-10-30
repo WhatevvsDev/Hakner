@@ -33,15 +33,14 @@ namespace hakner
 		int tileCount = -1;
 		int availableThreads = 0;
 
-		RenderTile* renderTiles { nullptr };
+		RenderTile* renderTiles{ nullptr };
 
 		::std::thread* threads;
 		::std::atomic<int> nextTile{ -1 };
-		::std::atomic<bool> finishedRendering{ false };
 		::std::mutex tileM;
 		::std::condition_variable tileCV;
 
-		BVHAS* accelStructure { nullptr };
+		BVHAS* accelStructure{ nullptr };
 
 		// TODO: Replace this
 		::std::vector<Sphere> g_world;
@@ -56,9 +55,9 @@ namespace hakner
 		{
 			// ---------- Load Assets ----------
 
-			for(int z = 0; z < 100; z++)
+			for (int z = 0; z < 10; z++)
 			{
-				for(int x = 0; x < 100; x++)
+				for (int x = 0; x < 10; x++)
 				{
 					g_world.push_back({ { (float)x, 0, (float)z }, {255,255,0,0}, 0.4f });
 				}
@@ -67,8 +66,8 @@ namespace hakner
 			accelStructure = new BVHAS(g_world);
 
 			// ---------- Initialize Threads and Render Tiles ----------
-			int tileCountX = AppWindow::State->width / tileSize;
-			int tileCountY = AppWindow::State->height / tileSize;
+			int tileCountX = AppWindow::State.width / tileSize;
+			int tileCountY = AppWindow::State.height / tileSize;
 
 			tileCount = tileCountX * tileCountY;
 
@@ -158,19 +157,19 @@ namespace hakner
 
 		void SaveRenderToFile()
 		{
-			stbi_write_jpg("Render.jpg", AppWindow::State->width, AppWindow::State->height, 4, AppWindow::State->backBuffer, 95);
+			stbi_write_jpg("Render.jpg", AppWindow::State.width, AppWindow::State.height, 4, AppWindow::State.backBuffer, 95);
 		}
 
 		Ray Renderer::GeneratePinholeRay(ScreenCoord::Pixel aPixel)
 		{
 			// ---------- Generate new Ray ----------
 			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
-			aPixel.x -= AppWindow::State->width / 2;
-			aPixel.y -= AppWindow::State->height / 2;
+			aPixel.x -= AppWindow::State.width / 2;
+			aPixel.y -= AppWindow::State.height / 2;
 
 			float tanHalfAngle = tan(Renderer::Camera.fieldOfView * 0.5f);
 
-			float mul = tanHalfAngle / (float)AppWindow::State->width;
+			float mul = tanHalfAngle / (float)AppWindow::State.width;
 			Vector3 direction = (Vector3(aPixel.x * mul, -aPixel.y * mul, -1));
 			direction.Normalize();
 
@@ -210,12 +209,12 @@ namespace hakner
 
 		void IntersectWorld(Ray& aRay, HitData& aData)
 		{
-			accelStructure->IntersectBVH(aRay,aData);
+			accelStructure->IntersectBVH(aRay, aData);
 		}
 
 		void RaytraceThreadMain()
 		{
-			while(!	AppWindow::State->shouldClose)
+			while (!AppWindow::State.shouldClose)
 			{
 				RaytraceTile();
 			}
@@ -225,7 +224,7 @@ namespace hakner
 		void RaytraceTile()
 		{
 			// QoL
-			auto surface = AppWindow::State->backBuffer;
+			auto surface = AppWindow::State.backBuffer;
 
 			// Fetch new tile
 			int nextTileIndex = nextTile.fetch_sub(1);
@@ -234,14 +233,8 @@ namespace hakner
 			if (nextTileIndex < 0)
 			{
 				std::unique_lock<std::mutex> lock(tileM);
-
-				if(nextTileIndex == -(availableThreads + 1))
-				{
-					finishedRendering.store(true);
-					tileCV.notify_all();
-				}
-
-				tileCV.wait(lock, [](){ return !finishedRendering.load(); });
+				tileCV.notify_all();
+				tileCV.wait(lock, []() { return nextTile.load() >= 0; });
 				return;
 			}
 
@@ -249,37 +242,31 @@ namespace hakner
 
 			// Internal offset
 			for (int iy = 0; iy < 8; iy++)
-			for (int ix = 0; ix < 8; ix++)
-			{
-				int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State->width;
-				Ray generatedRay = Renderer::GeneratePinholeRay(ScreenCoord::Pixel(currentTile.x + ix, currentTile.y + iy));
-				HitData data;
+				for (int ix = 0; ix < 8; ix++)
+				{
+					int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State.width;
+					Ray generatedRay = Renderer::GeneratePinholeRay(ScreenCoord::Pixel(currentTile.x + ix, currentTile.y + iy));
+					HitData data;
 
-				IntersectWorld(generatedRay, data);
-				
-				if (!data.intersections)
-					surface[backBufferIndex] = Sky(generatedRay).value;
-				else if (showNormals)
-					surface[backBufferIndex] = data.color.value;
-				else
-					surface[backBufferIndex] = VectorToColor(data.normal * 0.5f + Vector3{ 0.5f }).value;
-			}
+					IntersectWorld(generatedRay, data);
+
+					if (!data.intersections)
+						surface[backBufferIndex] = Sky(generatedRay).value;
+					else
+						surface[backBufferIndex] = data.color.value;
+				}
 		}
 
 		void Renderer::Render()
 		{
 			// ---------- Reseting threads for next frame ----------
 			// This happens here because we have to wait for the app to present before resetting the render
-			finishedRendering.store(false);
+
 			nextTile.store(tileCount - 1);
 			tileCV.notify_all();
 
-			// While not finished rendering
-			while(!finishedRendering.load())
-			{
-				if(AppWindow::State->shouldClose)
-					return;
-			}
+			std::unique_lock<std::mutex> lock(tileM);
+			tileCV.wait(lock, []() { return (nextTile.load() < 0) || AppWindow::State.shouldClose; });
 
 			float deltaTime = renderTimer.Delta();
 

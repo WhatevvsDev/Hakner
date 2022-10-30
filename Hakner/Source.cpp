@@ -27,14 +27,14 @@ int main()
 	AppWindow::Initialize();
 	Graphics::Renderer::Initialize();
 
-	SDL_SetRenderDrawColor(windowData->renderer,255,0,0,255);
+	SDL_SetRenderDrawColor(windowData.renderer,255,0,0,255);
 	
 	// ---------- Main Loop ----------
 	SDL_Event e;
 	
-	while (!AppWindow::State->shouldClose) 
+	while (!AppWindow::State.shouldClose) 
 	{ 
-		SDL_RenderClear(windowData->renderer);
+		SDL_RenderClear(windowData.renderer);
 
 		ImGui_ImplSDLRenderer_NewFrame();
         ImGui_ImplSDL2_NewFrame();
@@ -48,13 +48,13 @@ int main()
 			switch(e.type)
 			{
 				case SDL_QUIT:
-					AppWindow::State->shouldClose = true;
+					AppWindow::State.shouldClose = true;
 				break;
 				case SDL_KEYDOWN:
 				{
 					if(e.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
 					{
-						AppWindow::State->shouldClose = true;
+						AppWindow::State.shouldClose = true;
 						break;
 					}
 					Graphics::Renderer::KeyPress(e.key.keysym.scancode, true);
@@ -76,11 +76,11 @@ int main()
 		ImGui::Render();
 
 		// ---------- Copy CPU backbuffer to GPU texture, and present that on-screen ----------
-		SDL_UpdateTexture(windowData->texture, NULL, windowData->backBuffer, windowData->width * sizeof(uint32_t));
-		SDL_RenderCopy(windowData->renderer, windowData->texture, NULL, NULL);
+		SDL_UpdateTexture(windowData.texture, NULL, windowData.backBuffer, windowData.width * sizeof(uint32_t));
+		SDL_RenderCopy(windowData.renderer, windowData.texture, NULL, NULL);
 
 		ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-		SDL_RenderPresent(windowData->renderer);
+		SDL_RenderPresent(windowData.renderer);
 	}
 
 	Graphics::Renderer::Destroy();
