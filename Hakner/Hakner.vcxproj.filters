@@ -15,49 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AppWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HaknerMath.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui_demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui_draw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui_impl_sdl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui_impl_sdlrenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui_tables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Dependencies\ImGUI\imgui_widgets.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ScreenCoordinates.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AccelerationStructure.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sphere.cpp">
+    <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,61 +26,5 @@
     <ClInclude Include="AppWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Helper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stb_image_write.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imstb_truetype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imgui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imgui_impl_sdl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imgui_impl_sdlrenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imgui_internal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imstb_rectpack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\ImGUI\imstb_textedit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScreenCoordinates.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AccelerationStructure.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SimpleMath.inl">
-      <Filter>Header Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

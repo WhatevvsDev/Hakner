@@ -1,5 +1,4 @@
-#include "Renderer.h"
-#include "AppWindow.h"
+#include "Renderer_RT.h"
 #include "Math.h"
 #include "Sphere.h"
 #include "AccelerationStructure.h"
@@ -11,8 +10,6 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-
-#include "Dependencies/ImGUI/imgui.h"
 
 namespace hakner
 {
@@ -49,25 +46,31 @@ namespace hakner
 		Vector3 activeRenderPosition;
 		Matrix activeRenderMatrix;
 
+		float secondTimer { 0 };
+		int framesThisSecond { 0 };
+		int framesPerSecond { 0 };
+
 		// ---------- INITIALIZE ----------
 
-		void Renderer::Initialize()
+		void Renderer::Initialize(RenderTarget& aRenderTarget)
 		{
+			renderTarget = aRenderTarget;
+
 			// ---------- Load Assets ----------
 
 			for (int z = 0; z < 100; z++)
 			{
 				for (int x = 0; x < 100; x++)
 				{
-					g_world.push_back({ { (float)x, 0, (float)z }, {255,255,0,0}, 0.4f });
+					g_world.push_back({ { (float)x , 0, (float)z}, {255,255,0,0}, 0.4f });
 				}
 			}
 
 			accelStructure = new BVHAS(g_world);
 
 			// ---------- Initialize Threads and Render Tiles ----------
-			int tileCountX = AppWindow::State.width / tileSize;
-			int tileCountY = AppWindow::State.height / tileSize;
+			int tileCountX = renderTarget.width / tileSize;
+			int tileCountY = renderTarget.height / tileSize;
 
 			tileCount = tileCountX * tileCountY;
 
@@ -93,50 +96,11 @@ namespace hakner
 
 		void Renderer::Destroy()
 		{
+			Internal::exitingApplication = true;
+			tileCV.notify_all();
+
 			for (int i = 0; i < availableThreads; i++)
 				threads[i].join();
-		}
-
-		// ---------- INPUT ----------
-
-		void Renderer::MouseMove(int aDeltaX, int aDeltaY)
-		{
-			Camera.AddYaw((float)-aDeltaX);
-			Camera.AddPitch((float)-aDeltaY);
-		}
-
-		void Renderer::KeyPress(SDL_Scancode aKey, bool aPressed)
-		{
-			switch (aKey)
-			{
-			case SDL_SCANCODE_W:
-				forward = aPressed;
-				break;
-			case SDL_SCANCODE_A:
-				left = aPressed;
-				break;
-			case SDL_SCANCODE_S:
-				backward = aPressed;
-				break;
-			case SDL_SCANCODE_D:
-				right = aPressed;
-				break;
-			case SDL_SCANCODE_LSHIFT:
-			case SDL_SCANCODE_RSHIFT:
-				down = aPressed;
-				break;
-			case SDL_SCANCODE_P:
-				if (!aPressed) // Released
-					renderToFile = true;
-				break;
-			case SDL_SCANCODE_SPACE:
-				up = aPressed;
-				break;
-			}
-
-			moveHor = right - left;
-			moveWard = backward - forward;
-			moveVer = up - down;
 		}
 
 		// ---------- UPDATE ----------
@@ -146,9 +110,23 @@ namespace hakner
 			// ---------- Converted to seconds for ease of use in movement ---------- 
 			float deltaTime = updateTimer.Delta() * 0.001f;
 
+			secondTimer += deltaTime;
+			if(secondTimer >= 1.0f)
+			{
+				secondTimer -= 1.0f;
+				framesPerSecond = framesThisSecond;
+				framesThisSecond = 0;
+			}
+			else
+			{
+				framesThisSecond++;
+			}
+
 			// ---------- Get move direction, align with camera, and update position ----------
 			Vector3 moveVector = Vector3{ (float)moveHor, (float)moveVer, (float)moveWard };
 			moveVector = Vector3::Transform(moveVector, Camera.GetRotationMatrix());
+
+			moveVector = {0,deltaTime,deltaTime};
 
 			Camera.position += moveVector * 20.0f * deltaTime;
 		}
@@ -157,19 +135,19 @@ namespace hakner
 
 		void SaveRenderToFile()
 		{
-			stbi_write_jpg("Render.jpg", AppWindow::State.width, AppWindow::State.height, 4, AppWindow::State.backBuffer, 95);
+			stbi_write_jpg("Render.jpg", Renderer::renderTarget.width, Renderer::renderTarget.height, 4, Renderer::renderTarget.backBuffer, 95);
 		}
 
 		Ray Renderer::GeneratePinholeRay(ScreenCoord::Pixel aPixel)
 		{
 			// ---------- Generate new Ray ----------
 			// TODO: All of this only has to be generated once, unless resolution or camera "lens" type changes
-			aPixel.x -= AppWindow::State.width / 2;
-			aPixel.y -= AppWindow::State.height / 2;
+			aPixel.x -= renderTarget.width / 2;
+			aPixel.y -= renderTarget.height / 2;
 
 			float tanHalfAngle = tan(Renderer::Camera.fieldOfView * 0.5f);
 
-			float mul = tanHalfAngle / (float)AppWindow::State.width;
+			float mul = tanHalfAngle / (float)renderTarget.width;
 			Vector3 direction = (Vector3(aPixel.x * mul, -aPixel.y * mul, -1));
 			direction.Normalize();
 
@@ -214,7 +192,7 @@ namespace hakner
 
 		void RaytraceThreadMain()
 		{
-			while (!AppWindow::State.shouldClose)
+			while (!Renderer::Internal::exitingApplication)
 			{
 				RaytraceTile();
 			}
@@ -224,7 +202,7 @@ namespace hakner
 		void RaytraceTile()
 		{
 			// QoL
-			auto surface = AppWindow::State.backBuffer;
+			auto surface = Renderer::renderTarget.backBuffer;
 
 			// Fetch new tile
 			int nextTileIndex = nextTile.fetch_sub(1);
@@ -234,7 +212,7 @@ namespace hakner
 			{
 				std::unique_lock<std::mutex> lock(tileM);
 				tileCV.notify_all();
-				tileCV.wait(lock, []() { return nextTile.load() >= 0; });
+				tileCV.wait(lock, []() { return (nextTile.load() >= 0) || (Renderer::Internal::exitingApplication); });
 				return;
 			}
 
@@ -242,31 +220,34 @@ namespace hakner
 
 			// Internal offset
 			for (int iy = 0; iy < 8; iy++)
-				for (int ix = 0; ix < 8; ix++)
-				{
-					int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * AppWindow::State.width;
-					Ray generatedRay = Renderer::GeneratePinholeRay(ScreenCoord::Pixel(currentTile.x + ix, currentTile.y + iy));
-					HitData data;
+			for (int ix = 0; ix < 8; ix++)
+			{
+				int backBufferIndex = (currentTile.x + ix) + (currentTile.y + iy) * Renderer::renderTarget.width;
+				Ray generatedRay = Renderer::GeneratePinholeRay(ScreenCoord::Pixel(currentTile.x + ix, currentTile.y + iy));
+				HitData data;
 
-					IntersectWorld(generatedRay, data);
+				IntersectWorld(generatedRay, data);
 
-					if (!data.intersections)
-						surface[backBufferIndex] = Sky(generatedRay).value;
-					else
-						surface[backBufferIndex] = data.color.value;
-				}
+				surface[backBufferIndex] = data.bvhColor.value;
+
+				/*
+				if (!data.intersections)
+					surface[backBufferIndex] = Sky(generatedRay).value;
+				else
+					surface[backBufferIndex] = data.color.value;
+				*/
+			}
 		}
 
 		void Renderer::Render()
 		{
 			// ---------- Reseting threads for next frame ----------
-			// This happens here because we have to wait for the app to present before resetting the render
 
 			nextTile.store(tileCount - 1);
 			tileCV.notify_all();
 
 			std::unique_lock<std::mutex> lock(tileM);
-			tileCV.wait(lock, []() { return (nextTile.load() < 0) || AppWindow::State.shouldClose; });
+			tileCV.wait(lock, []() { return (nextTile.load() < 0) || Internal::exitingApplication; });
 
 			float deltaTime = renderTimer.Delta();
 
@@ -275,14 +256,6 @@ namespace hakner
 				SaveRenderToFile();
 				renderToFile = false;
 			}
-
-			ImGui::SetNextWindowPos({ 0,0 });
-			ImGui::SetNextWindowSize({ 200, 80 });
-			ImGui::Begin("Metrics", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration);
-
-			ImGui::Text(" %.2fms per frame \n", deltaTime);
-
-			ImGui::End();
 
 			activeRenderMatrix = Renderer::Camera.GetRotationMatrix();
 			activeRenderPosition = Renderer::Camera.position;

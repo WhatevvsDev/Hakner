@@ -2,8 +2,6 @@
 #include <SDL.h>
 #include <string>
 
-#include "Dependencies/ImGUI/imgui.h"
-
 namespace hakner
 {
 	namespace AppWindow

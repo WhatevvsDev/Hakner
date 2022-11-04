@@ -11,44 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AccelerationStructure.cpp" />
     <ClCompile Include="AppWindow.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui_demo.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui_draw.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui_impl_sdl.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui_impl_sdlrenderer.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui_tables.cpp" />
-    <ClCompile Include="Dependencies\ImGUI\imgui_widgets.cpp" />
-    <ClCompile Include="HaknerMath.h" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="ScreenCoordinates.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="Sphere.cpp" />
-    <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
-    <ClInclude Include="Dependencies\ImGUI\imgui.h" />
-    <ClInclude Include="Dependencies\ImGUI\imgui_impl_sdl.h" />
-    <ClInclude Include="Dependencies\ImGUI\imgui_impl_sdlrenderer.h" />
-    <ClInclude Include="Dependencies\ImGUI\imgui_internal.h" />
-    <ClInclude Include="Dependencies\ImGUI\imstb_rectpack.h" />
-    <ClInclude Include="Dependencies\ImGUI\imstb_textedit.h" />
-    <ClInclude Include="Dependencies\ImGUI\imstb_truetype.h" />
-    <ClInclude Include="Math.h" />
-    <ClInclude Include="AccelerationStructure.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Helper.h" />
-    <ClInclude Include="ScreenCoordinates.h" />
-    <ClInclude Include="SimpleMath.h" />
-    <ClInclude Include="Sphere.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="stb_image_write.h" />
-    <ClInclude Include="Timer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SimpleMath.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -56,7 +23,7 @@
     <ProjectGuid>{334ae483-f33e-4b35-a6df-b48f3b384936}</ProjectGuid>
     <RootNamespace>Hakner</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>HaknerRaytracing</ProjectName>
+    <ProjectName>Hakner</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -98,8 +65,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Hakner\Dependencies\SDL2\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;HaknerRaytracing.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)Hakner\Dependencies\SDL2\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -118,8 +85,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Hakner\Dependencies\SDL2\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;HaknerRaytracing.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);$(SolutionDir)Hakner\Dependencies\SDL2\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

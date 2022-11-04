@@ -1,6 +1,7 @@
 #pragma once
+#include "Renderer.h"
+
 #include "Math.h"
-#include "SDL.h"
 #include "Timer.h"
 #include "ScreenCoordinates.h"
 
@@ -16,6 +17,7 @@ namespace hakner
 			int intersections { 0 };
 			int bvhIntersections { 0 };
 			float distance { INFINITY };
+			Color bvhColor;
 		};
 
 		// TODO: do this properly
@@ -26,12 +28,17 @@ namespace hakner
 
 		namespace Renderer
 		{
+			inline struct RenderTarget
+			{
+				int width { 0 };
+				int height { 0 };
+				uint32_t* backBuffer { nullptr };
+			} renderTarget;
 
-			// ---------- Main Functions ----------
+			// ---------- Main Functions ---------- 
+			
 			void Initialize();
-			void Destroy();
-			void Update();
-			void Render();
+			void Initialize(RenderTarget& aRenderTarget);
 
 			// ---------- Ray Generation Functions ----------
 			// TODO: implement these :)
@@ -44,11 +51,6 @@ namespace hakner
 			Ray GenerateCubeMapRay(ScreenCoord::Pixel aPixel);
 			Ray GenerateOrthographicRay(ScreenCoord::NDC aNDC);
 			Ray GenerateFibonacciSphereRay(ScreenCoord::UV aUV);
-
-
-			// ---------- Input ----------
-			void MouseMove(int aDeltaX, int aDeltaY);
-			void KeyPress(SDL_Scancode aKey, bool aPressed);
 
 			// TODO: Replace this
 			inline bool left = false;

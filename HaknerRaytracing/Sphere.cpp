@@ -1,5 +1,5 @@
 #include "Sphere.h"
-#include "Renderer.h"
+#include "Renderer_RT.h"
 #include "Math.h"
 
 namespace hakner

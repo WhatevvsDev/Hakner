@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HaknerRaytracing", "Hakner\Hakner.vcxproj", "{334AE483-F33E-4B35-A6DF-B48F3B384936}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Hakner", "Hakner\Hakner.vcxproj", "{334AE483-F33E-4B35-A6DF-B48F3B384936}"
+	ProjectSection(ProjectDependencies) = postProject
+		{27CC7B47-586B-4A06-856A-2F580757E9EA} = {27CC7B47-586B-4A06-856A-2F580757E9EA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HaknerRaytracing", "HaknerRaytracing\HaknerRaytracing.vcxproj", "{27CC7B47-586B-4A06-856A-2F580757E9EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{334AE483-F33E-4B35-A6DF-B48F3B384936}.Debug|x64.Build.0 = Debug|x64
 		{334AE483-F33E-4B35-A6DF-B48F3B384936}.Release|x64.ActiveCfg = Release|x64
 		{334AE483-F33E-4B35-A6DF-B48F3B384936}.Release|x64.Build.0 = Release|x64
+		{27CC7B47-586B-4A06-856A-2F580757E9EA}.Debug|x64.ActiveCfg = Debug|x64
+		{27CC7B47-586B-4A06-856A-2F580757E9EA}.Debug|x64.Build.0 = Debug|x64
+		{27CC7B47-586B-4A06-856A-2F580757E9EA}.Release|x64.ActiveCfg = Release|x64
+		{27CC7B47-586B-4A06-856A-2F580757E9EA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

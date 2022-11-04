@@ -62,45 +62,43 @@ namespace hakner
 			}
 		}
 
+		float BVHAS::EvaluateSAH(BVHNode& aNode, int aAxis, float aPos)
+		{
+			// determine triangle counts and bounds for this split candidate
+			AABB leftBox, rightBox;
+			int leftCount = 0, rightCount = 0;
+			for( unsigned int i = 0; i < aNode.primitiveCount; i++ )
+			{
+				Sphere& primitive = target[aNode.firstIndex + i];
+				if (primitive.position[aAxis] < aPos)
+				{
+					leftCount++;
+					leftBox.IncludePoint( primitive.position );
+				}
+				else
+				{
+					rightCount++;
+					rightBox.IncludePoint( primitive.position );
+				}
+			}
+			float cost = leftCount * leftBox.Area() + rightCount * rightBox.Area();
+			return cost > 0 ? cost : 1e30f;		
+		}
+
 		void BVHAS::SubdivideBVHNode(unsigned int aNodeIdx)
 		{
 			// QoL
 			BVHNode& aNode = bvhNodes[aNodeIdx];
 
-			// ---------- Prevent nodes containing only 1 primitive ---------- 
-			if (aNode.primitiveCount <= 2) 
+
+			// ---------- Calculate SAH ---------- 
+			int splitAxis;
+			float splitPos;
+			float splitCost = FindBestSplitPlane( aNode, splitAxis, splitPos );
+			
+			// ---------- Prevent splitting unnecessarily ----------
+			if (splitCost >= CalculateNodeCost(aNode)) 
 				return;
-
-			// ---------- Calculate largest axis ---------- 
-			Vector3 extent = aNode.AABBMax - aNode.AABBMin;
-
-			int axis = 0;
-			if (extent.y > extent.x) 
-				axis = 1;
-			if (extent.z > extent[axis]) 
-				axis = 2;
-
-			float splitPos = aNode.AABBMin[axis] + extent[axis] * 0.5f;
-
-			// determine split axis using SAH
-			int bestAxis = -1;
-			float bestPos = 0;
-			float bestCost = 1e30f;
-
-			/*
-			// For each axis and each primitive
-			for( int axis = 0; axis < 3; axis++ ) 
-			for( unsigned int i = 0; i < aNode.primitiveCount; i++ )
-			{
-				Sphere& primitive = target[aNode.leftNodeIdx + i];
-				float candidatePos = triangle.centroid[axis];
-				float cost = EvaluateSAH( node, axis, candidatePos );
-				if (cost < bestCost) 
-					bestPos = candidatePos, bestAxis = axis, bestCost = cost;
-			}
-			int axis = bestAxis;
-			float splitPos = bestPos;
-			*/
 
 			// in-place partition
 			int i = aNode.firstIndex;
@@ -108,7 +106,7 @@ namespace hakner
 
 			while (i <= j)
 			{
-				if (target[i].position[axis] < splitPos)
+				if (target[i].position[splitAxis] < splitPos)
 				{
 					i++;
 				}
@@ -146,6 +144,35 @@ namespace hakner
 			SubdivideBVHNode(leftIdx + 1);
 		}
 
+		
+		float BVHAS::FindBestSplitPlane(BVHNode& aNode, int& aAxis, float& aSplitPos)
+		{	
+			float bestCost = 1e30f;
+			for (int a = 0; a < 3; a++) 
+			{
+				float boundsMin = aNode.AABBMin[a];
+				float boundsMax = aNode.AABBMax[a];
+				if (boundsMin == boundsMax) continue;
+				float scale = (boundsMax - boundsMin) / (float)splitPlaneCount;
+				for (unsigned int i = 1; i < splitPlaneCount; i++)
+				{
+					float candidatePos = boundsMin + i * scale;
+					float cost = EvaluateSAH( aNode, a, candidatePos );
+					if (cost < bestCost)
+						aSplitPos = candidatePos, aAxis = a, bestCost = cost;
+				}
+			}
+			return bestCost;
+		}
+
+		
+		float BVHAS::CalculateNodeCost(BVHNode& aNode)
+		{
+			Vector3 e = aNode.AABBMax - aNode.AABBMin; // extent of parent
+			float parentArea = e.x * e.y + e.y * e.z + e.z * e.x;
+			return aNode.primitiveCount * parentArea;
+		}
+
 		void BVHAS::IntersectBVH(Ray& aRay, HitData& aData)
 		{
 			IntersectBVH(aRay, aData, 0);
@@ -163,6 +190,11 @@ namespace hakner
 
 			if (aNode.primitiveCount != 0)
 			{
+				srand(aNodeIdx);
+				aData.bvhColor.r = 128 + (rand() % 127);
+				aData.bvhColor.g = 128 + (rand() % 127);
+				aData.bvhColor.b = 128 + (rand() % 127);
+
 				for (unsigned int i = 0; i < aNode.primitiveCount; i++ )
 					target[aNode.firstIndex + i].Intersect( aRay, aData);
 			}

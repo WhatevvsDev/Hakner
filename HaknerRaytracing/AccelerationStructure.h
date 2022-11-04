@@ -2,7 +2,7 @@
 #include "SimpleMath.h"
 #include "Math.h"
 #include "Sphere.h"
-#include "Renderer.h"
+#include "Renderer_RT.h"
 #include <vector>
 
 using namespace DirectX::SimpleMath;
@@ -11,36 +11,26 @@ namespace hakner
 {
 	namespace Graphics
 	{
-
-		// TODO: Convert all of this to indices for GPU portability
-
 		// Courtesy of Jacco Bikker
 		struct BVHNode
 		{
-			Vector3 AABBMin, AABBMax;
+			Vector3 AABBMin {1e30f, 1e30f, 1e30f};
+			Vector3 AABBMax {-1e30f, -1e30f, -1e30f};
 			unsigned int firstIndex; // Relates to nodes or primitives depending on primitiveCount
 			unsigned int primitiveCount;
 		};
 
-		inline Vector3 VectorMin(Vector3& a, Vector3& b)
+		struct AABB
 		{
-			return
-			{
-				fminf(a.x, b.x),
-				fminf(a.y, b.y),
-				fminf(a.z, b.z)
-			};
-		}
-
-		inline Vector3 VectorMax(Vector3& a, Vector3& b)
-		{
-			return
-			{
-				fmaxf(a.x, b.x),
-				fmaxf(a.y, b.y),
-				fmaxf(a.z, b.z)
-			};
-		}
+			Vector3 min {1e30f, 1e30f, 1e30f};
+			Vector3 max {-1e30f, -1e30f, -1e30f};
+			void IncludePoint( Vector3 aPoint ) { min = VectorMin( min, aPoint ), max = VectorMax( max, aPoint ); }
+			float Area() 
+			{ 
+				Vector3 e = max - min; // box extent
+				return e.x * e.y + e.y * e.z + e.z * e.x; 
+			}
+		};
 
 		inline bool IntersectAABB( const Ray& ray, const Vector3 bmin, const Vector3 bmax )
 		{
@@ -57,18 +47,24 @@ namespace hakner
 		}
 
 		// BVH Acceleration Structure
-		__declspec(align(32)) struct BVHAS
+		struct BVHAS
 		{
 			void IntersectBVH(Ray& ray, HitData& data);
 			BVHAS(std::vector<Sphere>& aTarget);
 
 		private:
-
+			const int splitPlaneCount { 16 };
 			unsigned int nodesUsed{ 0 };
 			BVHNode* bvhNodes{ nullptr };
 			std::vector<Sphere>& target;
 
 			void UpdateBVHNodeBounds(unsigned int aNodeIdx);
+
+			float FindBestSplitPlane( BVHNode& aNode, int& aAxis, float& aSplitPos );
+
+			float CalculateNodeCost(BVHNode& aNode);
+
+			float EvaluateSAH( BVHNode& aNode, int aAxis, float aPos );
 
 			void SubdivideBVHNode(unsigned int aNodeIdx);
 
