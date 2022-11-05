@@ -5,11 +5,11 @@ Hakner is a collection of hobby projects for me to improve at software developme
 
 
 ## Hakner Projects
-* [Raytracing Renderer](../master/RAYTRACING_README.md)
-* OpenGL Renderer
-* DirectX11 Renderer
-* DirectX12 Renderer
-* Input Library
+* [Raytracing Renderer](../master/RAYTRACING_README.md) (WIP)
+* OpenGL Renderer (Planned)
+* DirectX11 Renderer (Planned)
+* DirectX12 Renderer (Planned)
+* Input Library (Planned)
 
 ## License
 
