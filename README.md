@@ -8,3 +8,7 @@ Hakner is a collection of hobby projects for me to improve at software developme
 * DirectX11 Renderer
 * DirectX12 Renderer
 * Input Library
+
+## License
+
+This project is licensed under the MIT License
