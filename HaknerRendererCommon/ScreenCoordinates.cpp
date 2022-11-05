@@ -1,5 +1,5 @@
 #include "ScreenCoordinates.h"
-#include "Renderer_RT.h"
+#include "RendererCommon.h"
 
 namespace hakner
 {
@@ -17,8 +17,8 @@ namespace hakner
 
 			// 1920 x 1080 -> -1.0 to 1.0
 			NDC::NDC(const Pixel& in)
-				: x(((static_cast<float>(in.x) / static_cast<float>(Renderer::renderTarget.width)) * 2.0f) - 1.0f)
-				, y(((static_cast<float>(in.y) / static_cast<float>(Renderer::renderTarget.height)) * 2.0f) - 1.0f)
+				: x(((static_cast<float>(in.x) / static_cast<float>(TargetResolution.width)) * 2.0f) - 1.0f)
+				, y(((static_cast<float>(in.y) / static_cast<float>(TargetResolution.height)) * 2.0f) - 1.0f)
 			{};
 
 			// 0.0 to 1.0 -> -1.0 to 1.0
@@ -37,14 +37,14 @@ namespace hakner
 
 			// -1.0 to 1.0 -> 1920 x 1080
 			Pixel::Pixel(const NDC& in)
-				: x((in.x* static_cast<float>(Renderer::renderTarget.width)) + (static_cast<float>(Renderer::renderTarget.width) * 0.5f))
-				, y((in.y* static_cast<float>(Renderer::renderTarget.height)) + (static_cast<float>(Renderer::renderTarget.height) * 0.5f))
+				: x((in.x* static_cast<float>(TargetResolution.width)) + (static_cast<float>(TargetResolution.width) * 0.5f))
+				, y((in.y* static_cast<float>(TargetResolution.height)) + (static_cast<float>(TargetResolution.height) * 0.5f))
 			{};
 
 			// 0.0 to 1.0 -> 1920 x 1080
 			Pixel::Pixel(const UV& in)
-				: x(in.u* static_cast<float>(Renderer::renderTarget.width))
-				, y(in.v* static_cast<float>(Renderer::renderTarget.height))
+				: x(in.u* static_cast<float>(TargetResolution.width))
+				, y(in.v* static_cast<float>(TargetResolution.height))
 			{};
 
 			/* ---- UV SCREEN POS ---- */
@@ -63,8 +63,8 @@ namespace hakner
 
 			// 1920 x 1080 -> 0.0 to 1.0
 			UV::UV(const Pixel& in)
-				: u(in.x / static_cast<float>(Renderer::renderTarget.width))
-				, v(in.y / static_cast<float>(Renderer::renderTarget.height))
+				: u(in.x / static_cast<float>(TargetResolution.width))
+				, v(in.y / static_cast<float>(TargetResolution.height))
 			{};
 		}
 	}

@@ -2,7 +2,7 @@
 #include "SimpleMath.h"
 #include "Math.h"
 #include "Sphere.h"
-#include "Renderer_RT.h"
+#include "RendererRaytracing.h"
 #include <vector>
 
 using namespace DirectX::SimpleMath;
@@ -34,16 +34,30 @@ namespace hakner
 
 		inline bool IntersectAABB( const Ray& ray, const Vector3 bmin, const Vector3 bmax )
 		{
+			// TODO : Learn how this works lmao (Feedback from Falco)
+			
 			Vector3 o = ray.origin;
 			Vector3 d = ray.direction;
 
-			float tx1 = (bmin.x - o.x) / d.x, tx2 = (bmax.x - o.x) / d.x;
-			float tmin = fminf( tx1, tx2 ), tmax = fmaxf( tx1, tx2 );
-			float ty1 = (bmin.y - o.y) / d.y, ty2 = (bmax.y - o.y) / d.y;
-			tmin = fmaxf( tmin, fminf( ty1, ty2 ) ), tmax = fminf( tmax, fmaxf( ty1, ty2 ) );
-			float tz1 = (bmin.z - o.z) / d.z, tz2 = (bmax.z - o.z) / d.z;
-			tmin = fmaxf( tmin, fminf( tz1, tz2 ) ), tmax = fminf( tmax, fmaxf( tz1, tz2 ) );
-			return tmax >= tmin && tmin < ray.max && tmax > 0;
+			float tx1 = (bmin.x - o.x) / d.x;
+			float tx2 = (bmax.x - o.x) / d.x;
+
+			float tmin = fminf( tx1, tx2 );
+			float tmax = fmaxf( tx1, tx2 );
+
+			float ty1 = (bmin.y - o.y) / d.y;
+			float ty2 = (bmax.y - o.y) / d.y;
+
+				  tmin = fmaxf( tmin, fminf( ty1, ty2 ) );
+				  tmax = fminf( tmax, fmaxf( ty1, ty2 ) );
+
+			float tz1 = (bmin.z - o.z) / d.z;
+			float tz2 = (bmax.z - o.z) / d.z;
+
+				 tmin = fmaxf( tmin, fminf( tz1, tz2 ) );
+				 tmax = fminf( tmax, fmaxf( tz1, tz2 ) );
+
+			return (tmax >= tmin) && (tmin < ray.max) && (tmax > 0);
 		}
 
 		// BVH Acceleration Structure

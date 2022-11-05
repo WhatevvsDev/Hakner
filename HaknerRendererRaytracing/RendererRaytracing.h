@@ -1,9 +1,12 @@
 #pragma once
-#include "Renderer.h"
+
+#pragma comment(lib, "HaknerRendererCommon.lib")
+
+#include "../HaknerRendererCommon/RendererCommon.h"
+#include "../HaknerRendererCommon/ScreenCoordinates.h"
 
 #include "Math.h"
 #include "Timer.h"
-#include "ScreenCoordinates.h"
 
 namespace hakner
 {
@@ -46,22 +49,7 @@ namespace hakner
 			Ray GenerateThinLensRay(ScreenCoord::UV aUV);
 			Ray GeneratePaniniRay(ScreenCoord::Pixel aPixel);
 			Ray GenerateFisheyeRay(ScreenCoord::Pixel aPixel);
-			Ray GenerateLensletRay(ScreenCoord::UV aUV);
-			Ray GenerateOctahedralRay(ScreenCoord::UV aUV);
-			Ray GenerateCubeMapRay(ScreenCoord::Pixel aPixel);
 			Ray GenerateOrthographicRay(ScreenCoord::NDC aNDC);
-			Ray GenerateFibonacciSphereRay(ScreenCoord::UV aUV);
-
-			// TODO: Replace this
-			inline bool left = false;
-			inline bool right = false;
-			inline int moveHor = 0;
-			inline bool forward = false;
-			inline bool backward = false;
-			inline int moveWard = 0;
-			inline bool up = false;
-			inline bool down = false;
-			inline int moveVer = 0;
 
 			// ---------- Camera ----------
 			inline struct CameraData

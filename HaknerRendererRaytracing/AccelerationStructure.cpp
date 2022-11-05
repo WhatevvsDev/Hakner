@@ -144,27 +144,36 @@ namespace hakner
 			SubdivideBVHNode(leftIdx + 1);
 		}
 
-		
 		float BVHAS::FindBestSplitPlane(BVHNode& aNode, int& aAxis, float& aSplitPos)
 		{	
 			float bestCost = 1e30f;
+
+			// ---------- Check all axis ---------- 
 			for (int a = 0; a < 3; a++) 
 			{
 				float boundsMin = aNode.AABBMin[a];
 				float boundsMax = aNode.AABBMax[a];
-				if (boundsMin == boundsMax) continue;
+
+				if (boundsMin == boundsMax) 
+					continue;
+
+				// ---------- Check intervals along axis ---------- 
 				float scale = (boundsMax - boundsMin) / (float)splitPlaneCount;
 				for (unsigned int i = 1; i < splitPlaneCount; i++)
 				{
 					float candidatePos = boundsMin + i * scale;
 					float cost = EvaluateSAH( aNode, a, candidatePos );
-					if (cost < bestCost)
-						aSplitPos = candidatePos, aAxis = a, bestCost = cost;
+
+					if (cost >= bestCost) 
+						continue;
+
+					aSplitPos = candidatePos;
+					aAxis = a; 
+					bestCost = cost;
 				}
 			}
 			return bestCost;
 		}
-
 		
 		float BVHAS::CalculateNodeCost(BVHNode& aNode)
 		{

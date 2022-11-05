@@ -6,7 +6,16 @@
 //#include "Helper.h"
 #include <SDL.h>
 
-#include "../HaknerRaytracing/Renderer_RT.h"
+#ifdef _DEBUG
+#define DEPENDENCY_PATH "C:\\Hakner\\x64\\Debug\\"
+#else
+#define DEPENDENCY_PATH "C:\\Hakner\\x64\\Release\\"
+#endif
+
+#ifndef USE_RASTERIZER
+//#pragma comment(lib, DEPENDENCY_PATH "HaknerRendererRaytracing.lib;")
+#include "../HaknerRendererRaytracing/RendererRaytracing.h"
+#endif
 
 #ifdef main
 #undef main
@@ -23,11 +32,12 @@ int main()
 	// ---------- Initialize Window and Renderer ----------
 	AppWindow::Initialize();
 
-	Graphics::Renderer::RenderTarget target;
-
-	target.width = AppWindow::State.width;
-	target.height = AppWindow::State.height;
-	target.backBuffer = AppWindow::State.backBuffer;
+	Graphics::Renderer::RenderTarget target
+	{
+		windowData.width,
+		windowData.height,
+		windowData.backBuffer
+	};
 
 	Graphics::Renderer::Initialize(target);
 

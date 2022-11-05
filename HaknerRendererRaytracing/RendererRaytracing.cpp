@@ -1,4 +1,4 @@
-#include "Renderer_RT.h"
+#include "RendererRaytracing.h"
 #include "Math.h"
 #include "Sphere.h"
 #include "AccelerationStructure.h"
@@ -55,9 +55,9 @@ namespace hakner
 		void Renderer::Initialize(RenderTarget& aRenderTarget)
 		{
 			renderTarget = aRenderTarget;
+			ScreenCoord::TargetResolution = { renderTarget.width, renderTarget.height };
 
 			// ---------- Load Assets ----------
-
 			for (int z = 0; z < 100; z++)
 			{
 				for (int x = 0; x < 100; x++)
@@ -78,7 +78,7 @@ namespace hakner
 
 			for (int y = 0, i = 0; y < tileCountY; y++)
 				for (int x = 0; x < tileCountX; x++, i++)
-					renderTiles[i] = RenderTile(x * 8, y * 8);
+					renderTiles[i] = RenderTile(x * tileSize, y * tileSize);
 
 			availableThreads = std::thread::hardware_concurrency();
 			threads = new std::thread[availableThreads];
@@ -123,10 +123,7 @@ namespace hakner
 			}
 
 			// ---------- Get move direction, align with camera, and update position ----------
-			Vector3 moveVector = Vector3{ (float)moveHor, (float)moveVer, (float)moveWard };
-			moveVector = Vector3::Transform(moveVector, Camera.GetRotationMatrix());
-
-			moveVector = {0,deltaTime,deltaTime};
+			Vector3 moveVector = {0,deltaTime,deltaTime};
 
 			Camera.position += moveVector * 20.0f * deltaTime;
 		}
@@ -242,7 +239,6 @@ namespace hakner
 		void Renderer::Render()
 		{
 			// ---------- Reseting threads for next frame ----------
-
 			nextTile.store(tileCount - 1);
 			tileCV.notify_all();
 

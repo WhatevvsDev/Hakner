@@ -4,8 +4,15 @@ namespace hakner
 {
 	namespace Graphics
 	{
+		// Before using any form of screen coordinates, make sure to set the Target Resolution via ScreenCoord::TargetResolution
 		namespace ScreenCoord
 		{
+			inline struct 
+			{
+				int width { 0 };
+				int height { 0 };
+			} TargetResolution;
+
 			struct NDC;
 			struct Pixel;
 			struct UV;
