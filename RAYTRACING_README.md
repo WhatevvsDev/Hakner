@@ -1,5 +1,5 @@
 # Hakner Raytracer
-is a project for me to learn the ins and outs of modern raytracing on both CPU and later GPU.
+This is a project for me to learn the ins and outs of modern raytracing on both CPU and later GPU.
 
 ### Current Features
 * Sphere Intersection
